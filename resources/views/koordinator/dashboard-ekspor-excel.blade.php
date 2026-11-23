@@ -1,0 +1,6 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><style>body{font-family:Arial;color:#172033}table{border-collapse:collapse;width:100%;margin:0 0 18px}th,td{border:1px solid #aeb9b0;padding:7px;text-align:left}th{background:#dcebdc}.title{font-size:18px;font-weight:bold;background:#315d3a;color:#fff}</style></head><body>
+<table><tr><th colspan="3" class="title">Dashboard Analisis Koordinator</th></tr><tr><td>Periode</td><td colspan="2">{{ $periode }}</td></tr></table>
+<table><tr><th colspan="2">Ringkasan</th></tr>@foreach($ringkasan as $r)<tr><td>{{ $r['label'] }}</td><td>{{ $r['nilai'] }}</td></tr>@endforeach</table>
+<table><tr><th colspan="4">Tren dan Data Grafik</th></tr><tr><th>Bulan</th><th>Konseli/Pengajuan</th><th>Sesi selesai</th><th>Visual</th></tr>@foreach($tren as $t)<tr><td>{{ $t['bulan'] }}</td><td>{{ $t['pengajuan'] ?? $t['konseli'] ?? 0 }}</td><td>{{ $t['sesi'] }}</td><td>{{ str_repeat('=', min(40, (int)($t['pengajuan'] ?? $t['konseli'] ?? 0))) }}</td></tr>@endforeach</table>
+@foreach($distribusi as $nama=>$baris)<table><tr><th colspan="3">{{ $nama }}</th></tr><tr><th>Label</th><th>Jumlah</th><th>Persentase</th></tr>@foreach($baris as $r)<tr><td>{{ $r[0] ?? '' }}</td><td>{{ $r[1] ?? 0 }}</td><td>{{ $r[2] ?? 0 }}%</td></tr>@endforeach</table>@endforeach
+</body></html>

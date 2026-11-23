@@ -1,0 +1,142 @@
+/* Responsif khusus halaman admin berbasis komponen.
+   File ini dimuat setelah admin.css; selector sengaja dibuat lebih spesifik
+   agar tetap menang atas style inline milik halaman tanpa mengubah markup. */
+
+@media (max-width: 900px) {
+  body.admin-body .admin-content { min-width: 0; }
+  body.admin-body .kk-page,
+  body.admin-body .sa,
+  body.admin-body .sh-page,
+  body.admin-body .dm-page,
+  body.admin-body .pf-page { max-width: 100%; min-width: 0; }
+
+  body.admin-body .kk-grid { grid-template-columns: minmax(0, 1fr); }
+  body.admin-body .kk-modal { max-width: min(560px, calc(100vw - 32px)); }
+  body.admin-body .sa-card,
+  body.admin-body .sh-card,
+  body.admin-body .dm-card { max-width: 100%; }
+}
+
+@media (max-width: 760px) {
+  body.admin-body .kk-head,
+  body.admin-body .sh-head { align-items: stretch; }
+  body.admin-body .kk-head > .kk-btn,
+  body.admin-body .sh-head > .sh-btn-primary { width: 100%; }
+  body.admin-body .kk-toolbar { gap: 10px; }
+  body.admin-body .kk-tabs,
+  body.admin-body .dm-tabs,
+  body.admin-body .sa-tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; scrollbar-width: thin; }
+  body.admin-body .kk-tab,
+  body.admin-body .dm-tab,
+  body.admin-body .sa-tab { flex: 0 0 auto; }
+  body.admin-body .kk-card-head { flex-wrap: wrap; }
+  body.admin-body .kk-card-head h3 { flex: 1 1 180px; }
+  body.admin-body .kk-actions-sec { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body.admin-body .kk-actions-sec .kk-btn { min-height: 42px; white-space: normal; line-height: 1.2; }
+
+  body.admin-body .sa-head h1,
+  body.admin-body .sh-head h1,
+  body.admin-body .dm-head h1 { font-size: 20px; }
+  body.admin-body .sa-search,
+  body.admin-body .dm-search { width: 100%; max-width: none; }
+  body.admin-body .sa-table,
+  body.admin-body .sh-table,
+  body.admin-body .dm-table { min-width: 720px; }
+  body.admin-body .sa-wrap,
+  body.admin-body .sh-scroll,
+  body.admin-body .dm-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+  body.admin-body .sa-wrap::after,
+  body.admin-body .sh-scroll::after,
+  body.admin-body .dm-scroll::after { content: 'Geser ke samping untuk melihat kolom lain'; display: block; padding: 8px 14px 10px; color: #7d8582; font-size: 11px; }
+  body.admin-body .sa-modal,
+  body.admin-body .sh-modal,
+  body.admin-body .dm-modal { width: calc(100vw - 28px); max-height: calc(100dvh - 28px); padding: 22px 18px; }
+
+  body.admin-body .sh-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  body.admin-body .sh-stat { padding: 15px 8px; }
+  body.admin-body .sh-stat b { font-size: 19px; }
+  body.admin-body .tp-layout { grid-template-columns: minmax(0, 1fr); }
+  body.admin-body .tp-list { max-height: 220px; overflow-y: auto; }
+  body.admin-body .tp-pane { padding: 18px; }
+  body.admin-body .tp-pane-head { align-items: stretch; flex-direction: column; }
+  body.admin-body .tp-btn-edit { width: 100%; justify-content: center; }
+
+  body.admin-body .fp-row { padding: 15px 16px; align-items: flex-start; }
+  body.admin-body .fp-actions { flex-wrap: wrap; justify-content: flex-end; }
+  body.admin-body .fp-prodi-list { padding-left: 32px; padding-right: 16px; }
+  body.admin-body .fp-prodi-row { align-items: flex-start; }
+  body.admin-body .fp-prodi-nama { overflow-wrap: anywhere; }
+  body.admin-body .km-grid { grid-template-columns: minmax(0, 1fr); padding: 14px 16px; }
+
+  body.admin-body .pf-page { padding-top: 0; gap: 16px; }
+  body.admin-body .pf-card { padding: 22px; }
+  body.admin-body .pf-grid,
+  body.admin-body .pf-info-grid { grid-template-columns: minmax(0, 1fr); }
+  body.admin-body .pf-card .pf-btn { width: 100%; }
+  body.admin-body .pf-notif { align-items: flex-start; flex-wrap: wrap; }
+  body.admin-body .pf-notif .pf-switch { margin-left: auto; }
+  body.admin-body .pf-jam { align-items: flex-start; flex-direction: column; }
+  body.admin-body .pf-jam-range { width: 100%; flex-wrap: wrap; gap: 8px; }
+  body.admin-body .pf-time { flex: 1 1 110px; min-width: 0; }
+  body.admin-body .pf-toast { left: 14px; right: 14px; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); text-align: center; }
+}
+
+@media (max-width: 560px) {
+  body.admin-body .kk-grid > .admin-card { padding: 18px 16px; }
+  body.admin-body .kk-actions-sec { grid-template-columns: 1fr; }
+  body.admin-body .kk-actions-sec .kk-btn { min-height: 40px; }
+  body.admin-body .kk-foot-left { align-items: stretch; flex-direction: column; gap: 8px; }
+  body.admin-body .kk-perpage { justify-content: space-between; }
+  body.admin-body .kk-modal-overlay,
+  body.admin-body .sa-overlay,
+  body.admin-body .sh-modal-overlay,
+  body.admin-body .dm-modal-overlay { padding: 0; align-items: flex-end; }
+  body.admin-body .kk-modal,
+  body.admin-body .sa-modal,
+  body.admin-body .sh-modal,
+  body.admin-body .dm-modal { width: 100%; max-width: none; max-height: 94dvh; border-radius: 18px 18px 0 0; }
+  body.admin-body .kk-modal-actions,
+  body.admin-body .sa-modal-foot,
+  body.admin-body .sh-modal-actions,
+  body.admin-body .dm-modal-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  body.admin-body .kk-modal-actions .kk-btn,
+  body.admin-body .sa-modal-foot > *,
+  body.admin-body .sh-modal-actions > *,
+  body.admin-body .dm-modal-actions > * { width: 100%; justify-content: center; }
+
+  body.admin-body .sh-stats { grid-template-columns: minmax(0, 1fr); }
+  body.admin-body .sh-stat { display: grid; grid-template-columns: 30px 1fr; grid-template-rows: auto auto; align-items: center; text-align: left; column-gap: 10px; }
+  body.admin-body .sh-stat svg { grid-row: 1 / span 2; margin: 0 auto; }
+  body.admin-body .sh-stat b { font-size: 21px; }
+  body.admin-body .sh-q-row { grid-template-columns: 28px minmax(0, 1fr) 30px; gap: 8px; }
+  body.admin-body .sh-q-row .sh-q-col.hal { grid-column: 2 / 3; }
+  body.admin-body .sh-form-row { grid-template-columns: minmax(0, 1fr); }
+
+  body.admin-body .dm-tabs { display: flex; border-radius: 12px; }
+  body.admin-body .dm-tab { padding: 9px 13px; }
+  body.admin-body .dm-card-head { padding: 16px; align-items: stretch; }
+  body.admin-body .fp-row { gap: 8px; }
+  body.admin-body .fp-actions { margin-left: 0; width: 100%; }
+  body.admin-body .fp-row > .fp-actions { flex: 0 0 auto; width: auto; }
+  body.admin-body .fp-nama-wrap { flex: 1 1 auto; }
+  body.admin-body .fp-prodi-row { flex-wrap: wrap; }
+  body.admin-body .fp-prodi-actions { width: 100%; justify-content: flex-end; }
+  body.admin-body .dm-aksi-group { justify-content: flex-start; }
+
+  body.admin-body .pf-card { padding: 18px 16px; border-radius: 15px; }
+  body.admin-body .pf-title { font-size: 16px; margin-bottom: 18px; }
+  body.admin-body .pf-input { height: 44px; padding-left: 13px; padding-right: 13px; }
+  body.admin-body .pf-jam { padding: 12px; }
+}
+
+@media (max-width: 380px) {
+  body.admin-body .sa-table,
+  body.admin-body .sh-table,
+  body.admin-body .dm-table { min-width: 660px; }
+  body.admin-body .admin-content { padding-left: 10px; padding-right: 10px; }
+  body.admin-body .kk-stat b { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.admin-body .kk-page *, body.admin-body .sa *, body.admin-body .sh-page *, body.admin-body .dm-page *, body.admin-body .pf-page * { transition-duration: .01ms !important; }
+}

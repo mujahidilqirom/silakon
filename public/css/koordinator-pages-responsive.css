@@ -1,0 +1,42 @@
+/* Responsif halaman Koordinator, terutama Laporan & Analitik. */
+
+@media (max-width: 900px) {
+    body .lp-page { min-width: 0; max-width: 100%; }
+    body .lp-head-row { align-items: stretch; flex-direction: column; }
+    body .lp-filters { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
+    body .lp-period { grid-column: 1 / -1; width: 100%; }
+    body .lp-filters > .lp-select,
+    body .lp-filters > .lp-btn { width: 100%; min-width: 0; }
+    body .lp-filters > .lp-btn { justify-content: center; }
+    body .lp-grid-2 { grid-template-columns: minmax(0, 1fr); }
+    body .lp-chart { overflow-x: auto; justify-content: flex-start; gap: 16px; padding-left: 10px; padding-right: 10px; }
+    body .lp-chart-col { flex: 0 0 34px; }
+    body .lp-chart-legend { flex-wrap: wrap; }
+    body .lp-export { align-items: stretch; flex-direction: column; }
+    body .lp-export-actions { width: 100%; }
+    body .lp-export-actions .lp-btn { flex: 1 1 0; justify-content: center; }
+}
+
+@media (max-width: 640px) {
+    body .lp-page { padding-bottom: 10px; }
+    body .lp-head-row h1 { font-size: 20px; }
+    body .lp-filters { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+    body .lp-period { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding: 10px; }
+    body .lp-period .lp-period-label:first-child { grid-column: 1 / -1; }
+    body .lp-period .lp-period-label:nth-of-type(2) { align-self: center; }
+    body .lp-period .lp-check { grid-column: 1 / -1; }
+    body .lp-select { min-width: 0; width: 100%; }
+    body .lp-card { padding: 18px 16px; border-radius: 15px; }
+    body .lp-table-wrap { margin: 0 -2px; overflow-x: auto; }
+    body .lp-table { min-width: 430px; }
+    body .lp-jenis-row { align-items: flex-start; }
+    body .lp-jenis-pct { width: 42px; height: 42px; }
+    body .lp-export-left { align-items: flex-start; }
+    body .lp-export-left p { line-height: 1.45; }
+    body .lp-export-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 380px) {
+    body .lp-export-actions { grid-template-columns: minmax(0, 1fr); }
+    body .lp-chart { gap: 11px; }
+}

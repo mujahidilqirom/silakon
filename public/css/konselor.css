@@ -1,0 +1,673 @@
+/* ==========================================================================
+   SILAKON — Portal Konselor
+   Simpan sebagai: public/css/konselor.css
+   Disamakan dengan admin.css (font, warna, ukuran sidebar & navbar).
+   Nama class tidak diubah.
+   ========================================================================== */
+
+:root {
+    --hijau:        #6E8F60;   /* = ad-green-600 */
+    --hijau-tua:    #4F7245;   /* = ad-green-700 */
+    --hijau-sedang: #86A878;   /* = ad-green-500 */
+    --hijau-muda:   #E4EFDE;   /* = ad-green-100 */
+    --hijau-lembut: #F2F8EF;   /* = ad-green-50  */
+    --bg:           #F7F9F7;
+    --kartu:        #ffffff;
+    --garis:        #E8ECE8;
+    --navy:         #1B2432;   /* judul & teks tebal */
+    --teks:         #2F3A47;
+    --teks-2:       #2F3A47;
+    --muted:        #6C7784;   /* teks deskripsi */
+    --redup:        #99A2AD;   /* teks samar */
+    --merah:        #D64545;
+    --radius:       16px;
+    --bayang:       0 1px 2px rgba(18, 28, 46, .03);
+    --sidebar-w:    240px;
+    --sidebar-w-kecil: 78px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--teks);
+    -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; border: 0; background: none; }
+svg { display: block; }
+
+:focus-visible { outline: 2px solid var(--hijau); outline-offset: 2px; border-radius: 6px; }
+
+/* ============================ KERANGKA ============================ */
+
+.konselor-app { display: flex; min-height: 100vh; }
+
+.konselor-utama {
+    flex: 1;
+    min-width: 0;
+    margin-left: var(--sidebar-w);
+    transition: margin-left .2s ease;
+}
+
+body.sidebar-tutup .konselor-utama { margin-left: var(--sidebar-w-kecil); }
+
+.konselor-isi { padding: 28px; }
+
+/* ============================ SIDEBAR ============================ */
+
+.sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: #fff;
+    border-right: 1px solid var(--garis);
+    display: flex;
+    flex-direction: column;
+    transition: width .2s ease;
+    z-index: 40;
+}
+
+body.sidebar-tutup .sidebar { width: var(--sidebar-w-kecil); }
+
+.sidebar-atas {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    height: 72px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--garis);
+}
+
+.sidebar-logo {
+    width: 34px; height: 34px;
+    flex: 0 0 34px;
+    border-radius: 11px;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 15px;
+    overflow: hidden;
+}
+
+.sidebar-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+.sidebar-nama { min-width: 0; flex: 1; }
+.sidebar-nama b {
+    display: block;
+    color: var(--navy);
+    font-size: 14.5px;
+    font-weight: 800;
+    letter-spacing: .3px;
+    line-height: 1.2;
+}
+.sidebar-nama span { display: block; font-size: 11.5px; color: var(--redup); margin-top: 1px; }
+
+.sidebar-toggle {
+    margin-left: auto;
+    flex: 0 0 26px;
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    color: var(--redup);
+    border-radius: 8px;
+}
+.sidebar-toggle svg { width: 16px; height: 16px; transition: transform .2s ease; }
+.sidebar-toggle:hover { background: #F1F4F1; color: var(--navy); }
+
+.sidebar-menu {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 14px 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    border-radius: 11px;
+    color: var(--teks);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color .15s ease, color .15s ease;
+}
+.sidebar-item svg { width: 19px; height: 19px; flex: 0 0 19px; stroke-width: 1.7; }
+.sidebar-item:hover { background: #F3F6F2; color: var(--teks); }
+.sidebar-item.aktif {
+    background: var(--hijau);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 6px 16px rgba(110, 143, 96, .28);
+}
+
+.sidebar-bawah {
+    flex: none;
+    margin-top: auto;
+    padding: 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--garis);
+}
+
+.sidebar-keluar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 13px;
+    border-radius: 11px;
+    color: var(--merah);
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+    transition: background-color .15s ease;
+}
+.sidebar-keluar svg { width: 19px; height: 19px; flex: 0 0 19px; stroke-width: 1.7; }
+.sidebar-keluar:hover { background: #FDF2F2; }
+
+/* mode ringkas */
+body.sidebar-tutup .sidebar-nama,
+body.sidebar-tutup .sidebar-item span,
+body.sidebar-tutup .sidebar-keluar span { display: none; }
+body.sidebar-tutup .sidebar-atas { justify-content: center; padding: 0 10px; }
+body.sidebar-tutup .sidebar-toggle {
+    position: absolute;
+    top: 72px;
+    right: -13px;
+    background: #fff;
+    border: 1px solid var(--garis);
+}
+body.sidebar-tutup .sidebar-toggle svg { transform: rotate(180deg); }
+body.sidebar-tutup .sidebar-item,
+body.sidebar-tutup .sidebar-keluar { justify-content: center; padding: 11px; }
+
+/* latar gelap drawer (hanya dipakai di tablet, lihat bagian responsif) */
+.sidebar-backdrop { display: none; }
+
+/* ============================ NAVBAR ============================ */
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 72px;
+    padding: 0 28px;
+    background: #fff;
+    border-bottom: 1px solid var(--garis);
+}
+
+.navbar-judul { flex: 1; min-width: 0; }
+.navbar-judul h1 {
+    color: var(--navy);
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -.3px;
+    line-height: 1.2;
+}
+.navbar-judul p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+.navbar-kanan { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+
+.navbar-lonceng {
+    position: relative;
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    color: var(--muted);
+    border-radius: 11px;
+}
+.navbar-lonceng:hover { background: #F3F6F2; color: var(--navy); }
+.navbar-lonceng svg { width: 20px; height: 20px; }
+.navbar-lonceng .titik {
+    position: absolute; top: 8px; right: 9px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--merah); border: 1.5px solid #fff;
+}
+
+.navbar-profil {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px 5px 5px;
+    border-radius: 12px;
+    text-align: left;
+}
+.navbar-profil:hover { background: transparent; }
+.navbar-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--hijau); color: #fff;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 14px;
+}
+.navbar-profil b {
+    display: block;
+    color: var(--navy);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.navbar-profil small { display: block; font-size: 12px; color: var(--redup); }
+.navbar-profil svg { width: 15px; height: 15px; color: var(--redup); }
+
+/* ============================ GRID & KARTU ============================ */
+
+.grid { display: grid; gap: 20px; }
+.grid + .grid { margin-top: 20px; }
+.grid.kolom-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); } /* menyesuaikan jumlah kartu */
+.grid.kolom-21 { grid-template-columns: minmax(0, 2.05fr) minmax(0, 1fr); align-items: start; }
+
+.kartu {
+    background: var(--kartu);
+    border: 1px solid var(--garis);
+    border-radius: var(--radius);
+    box-shadow: var(--bayang);
+}
+
+.kartu-kepala {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px 24px 16px;
+}
+.kartu-kepala h2 {
+    color: var(--navy);
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -.2px;
+}
+.kartu-kepala p { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+/* ============================ STATISTIK ============================ */
+
+.statistik { padding: 22px 22px 20px; }
+
+.statistik-ikon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    margin-bottom: 20px;
+}
+.statistik-ikon svg { width: 20px; height: 20px; stroke-width: 1.8; }
+
+.statistik b {
+    display: block;
+    color: var(--navy);
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.05;
+}
+.statistik .label {
+    display: block;
+    height: auto;
+    margin: 8px 0 0;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--teks);
+}
+.statistik .sub { display: block; font-size: 12px; color: var(--redup); margin-top: 5px; }
+
+.nada-hijau  { background: var(--hijau-muda); color: var(--hijau-tua); }
+.nada-biru   { background: #EAF1FB;           color: #3B6FC4; }
+.nada-kuning { background: #FCF3D7;           color: #B98A15; }
+.nada-ungu   { background: #EFEBFA;           color: #6C55C4; }
+
+/* ============================ TOMBOL ============================ */
+
+.tombol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--garis);
+    color: var(--navy);
+    background: #fff;
+    white-space: nowrap;
+    transition: border-color .15s ease, color .15s ease;
+}
+.tombol:hover { border-color: var(--hijau-sedang); color: var(--hijau-tua); }
+
+.tombol-isi { background: var(--hijau); border-color: var(--hijau); color: #fff; }
+.tombol-isi:hover { background: var(--hijau-tua); border-color: var(--hijau-tua); color: #fff; }
+
+.tombol-blok { width: 100%; }
+
+/* ============================ JADWAL HARI INI ============================ */
+
+.jadwal-hari-ini { min-height: 560px; }
+
+.jadwal-daftar { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 12px; }
+
+.jadwal-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: var(--hijau-lembut);
+}
+.jadwal-item.selesai { background: #FAFBFA; }
+
+.jadwal-jam { text-align: center; flex: 0 0 52px; }
+.jadwal-jam b { display: block; font-size: 16px; font-weight: 800; color: var(--hijau-tua); }
+.jadwal-jam span { display: block; font-size: 10.5px; color: var(--redup); letter-spacing: .4px; }
+.jadwal-item.selesai .jadwal-jam b { color: var(--redup); }
+
+.jadwal-info { min-width: 0; flex: 1; }
+.jadwal-info b { display: block; color: var(--navy); font-size: 15px; font-weight: 700; }
+.jadwal-info span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.jadwal-item.selesai .jadwal-info b { color: var(--redup); }
+
+.jadwal-aksi { display: flex; align-items: center; gap: 10px; }
+
+.label {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.label.nada-tunggu  { background: #FCF3D7; color: #8A6608; }
+.label.nada-selesai { background: var(--hijau-muda); color: var(--hijau-tua); }
+.label.nada-batal   { background: #FBE4E3; color: #B3403C; }
+
+.jadwal-kosong { padding: 40px 24px; text-align: center; color: var(--redup); font-size: 13.5px; }
+
+/* ============================ JADWAL MENDATANG ============================ */
+
+.mendatang-daftar { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.mendatang-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    background: var(--hijau-lembut);
+}
+.mendatang-item:nth-child(even) { background: #FAFBFA; }
+
+.mendatang-tanggal {
+    flex: 0 0 38px;
+    text-align: center;
+    color: var(--hijau-tua);
+}
+.mendatang-tanggal b { display: block; font-size: 14px; font-weight: 800; line-height: 1.1; }
+.mendatang-tanggal span { display: block; font-size: 10.5px; color: var(--redup); }
+
+.mendatang-info b { display: block; color: var(--navy); font-size: 14px; font-weight: 700; }
+.mendatang-info span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+
+.mendatang-kaki { padding: 4px 20px 20px; }
+
+/* ============================ KARTU CATATAN ============================ */
+
+.kartu-ajakan {
+    margin-top: 20px;
+    padding: 24px;
+    border-radius: var(--radius);
+    background: linear-gradient(160deg, var(--hijau-tua) 0%, var(--hijau) 100%);
+    color: #fff;
+}
+.kartu-ajakan-ikon { color: #fff; opacity: .9; margin-bottom: 14px; }
+.kartu-ajakan-ikon svg { width: 22px; height: 22px; stroke-width: 1.8; }
+.kartu-ajakan h3 { font-size: 17px; font-weight: 800; color: #fff; }
+.kartu-ajakan p {
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, .88);
+    margin: 6px 0 18px;
+    max-width: 34ch;
+}
+.kartu-ajakan .tombol {
+    background: rgba(255, 255, 255, .18);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 700;
+}
+.kartu-ajakan .tombol:hover { background: rgba(255, 255, 255, .28); color: #fff; }
+
+/* ============================ RESPONSIF ============================ */
+
+@media (max-width: 1200px) {
+    .grid.kolom-21 { grid-template-columns: 1fr; }
+    .jadwal-hari-ini { min-height: 0; }
+}
+
+@media (max-width: 860px) {
+    .sidebar { width: var(--sidebar-w-kecil); }
+    .sidebar .sidebar-nama, .sidebar-item span, .sidebar-keluar span { display: none; }
+    .sidebar-atas { justify-content: center; padding: 0 10px; }
+    .sidebar-item, .sidebar-keluar { justify-content: center; padding: 11px; }
+    .sidebar-toggle { display: none; }
+    .konselor-utama { margin-left: var(--sidebar-w-kecil); }
+    .navbar { padding: 0 18px; gap: 12px; }
+    .navbar-cari { display: none; }
+    .navbar-profil small, .navbar-profil b { display: none; }
+    .navbar-judul h1 { font-size: 18px; }
+    .konselor-isi { padding: 18px; }
+}
+
+/* Tablet (641-1024px) + ada tombol hamburger #tombolMenu: sidebar jadi drawer.
+   Kelas html.mode-drawer dipasang oleh script di sidebar.blade.php. */
+@media (min-width: 641px) and (max-width: 1024px) {
+    html.mode-drawer .konselor-utama,
+    html.mode-drawer body.sidebar-tutup .konselor-utama { margin-left: 0; }
+
+    html.mode-drawer .sidebar {
+        width: min(280px, 84vw);
+        z-index: 1100;
+        transform: translateX(-105%);
+        visibility: hidden;
+        transition: transform .25s ease, visibility 0s linear .25s;
+    }
+    html.mode-drawer body.menu-terbuka .sidebar {
+        transform: none;
+        visibility: visible;
+        transition: transform .25s ease;
+        box-shadow: 0 24px 60px rgba(15, 23, 18, .28);
+    }
+    html.mode-drawer body.menu-terbuka { overflow: hidden; }
+
+    /* di dalam drawer: tampilkan lagi label, bukan mode ikon saja */
+    html.mode-drawer .sidebar .sidebar-nama { display: block; }
+    html.mode-drawer .sidebar-item span,
+    html.mode-drawer .sidebar-keluar span { display: inline; }
+    html.mode-drawer .sidebar-atas { justify-content: flex-start; padding: 0 16px; }
+    html.mode-drawer .sidebar-item,
+    html.mode-drawer .sidebar-keluar { justify-content: flex-start; padding: 11px 13px; min-height: 44px; }
+    html.mode-drawer .sidebar-toggle { display: grid; }
+
+    html.mode-drawer .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1090;
+        background: rgba(15, 23, 18, .45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease;
+    }
+    html.mode-drawer body.menu-terbuka .sidebar-backdrop { opacity: 1; pointer-events: auto; }
+}
+
+/* Tombol hamburger hanya ada gunanya saat mode drawer aktif */
+html:not(.mode-drawer) #tombolMenu { display: none !important; }
+
+@media (max-width: 560px) {
+    .navbar-judul h1 { font-size: 16px; }
+    .navbar-judul p { font-size: 12px; }
+}
+
+/* HP: sidebar -> bottom navigation (sama seperti koordinator) */
+@media (max-width: 640px) {
+    body .sidebar,
+    body.sidebar-tutup .sidebar {
+        top: auto; left: 0; right: 0; bottom: 0;
+        width: 100%;
+        max-width: none;
+        transform: none;
+        visibility: visible;
+        overflow: hidden;
+        height: calc(60px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        flex-direction: row;
+        align-items: center;
+        border-right: 0;
+        border-top: 1px solid var(--garis);
+        box-shadow: 0 -4px 16px rgba(18, 28, 46, .06);
+        z-index: 50;
+    }
+    body .sidebar-atas,
+    body .sidebar-toggle,
+    body.sidebar-tutup .sidebar-toggle { display: none; }
+
+    body .sidebar-menu {
+        flex-direction: row;
+        flex: 1;
+        min-width: 0;
+        padding: 6px 8px;
+        gap: 4px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+    }
+    body .sidebar-menu::-webkit-scrollbar { display: none; }
+    body .sidebar-item,
+    body.sidebar-tutup .sidebar-item { flex: 0 0 auto; min-width: 46px; min-height: 44px; padding: 10px 12px; justify-content: center; }
+    body .sidebar-item span,
+    body .sidebar-keluar span { display: none; }
+
+    body .sidebar-bawah { flex: none; margin-top: 0; padding: 6px 8px; border-top: 0; border-left: 1px solid var(--garis); }
+    body .sidebar-bawah form { display: flex; }
+    body .sidebar-keluar,
+    body.sidebar-tutup .sidebar-keluar { width: auto; min-width: 46px; min-height: 44px; padding: 10px 12px; justify-content: center; }
+
+    body .konselor-utama,
+    body.sidebar-tutup .konselor-utama {
+        margin-left: 0;
+        padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .navbar { height: 56px; padding: 0 14px; }
+    .navbar-kanan { gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition-duration: .01ms !important; }
+}
+
+/* Penugasan dan tabel konselor tetap terbaca di ponsel. */
+@media (max-width: 720px) {
+    .penugasan-atas { flex-direction: column; align-items: stretch; gap: 14px; }
+    .penugasan-atas .tombol { width: 100%; justify-content: center; }
+    .penugasan-kartu { overflow: hidden; }
+    .kartu-kepala { flex-direction: column; gap: 12px; padding: 18px 16px; }
+    .kartu-kepala .tabel-cari { width: 100%; }
+    .tabel-cari input { width: 100%; min-width: 0; }
+    .tabel-bungkus { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tabel-slim { min-width: 720px; }
+    .tabel-aksi { flex-wrap: wrap; }
+}
+
+@media (max-width: 420px) {
+    .konselor-isi { padding: 14px; }
+    .kartu-kepala h2 { font-size: 16px; }
+    .mendatang-daftar { padding-left: 14px; padding-right: 14px; }
+}
+
+/* ==========================================================================
+   DASHBOARD KONSELOR — responsif
+   (statistik, jadwal hari ini, jadwal mendatang, kartu catatan)
+   ========================================================================== */
+.kartu-kepala--sejajar { align-items: center; }
+.jadwal-info b, .jadwal-info span,
+.mendatang-info b, .mendatang-info span { overflow-wrap: anywhere; }
+.mendatang-info { min-width: 0; }
+
+/* Laptop kecil / tablet / HP: kartu statistik selalu SEBARIS (satu kolom per kartu,
+   berapa pun jumlahnya), tidak menumpuk ke bawah */
+@media (max-width: 1180px) {
+    .grid.kolom-4 {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+    }
+}
+
+/* Tablet: panel kanan (mendatang + catatan) berdampingan, bukan menumpuk panjang */
+@media (min-width: 721px) and (max-width: 1200px) {
+    .panel-kanan { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+    .panel-kanan .kartu-ajakan { margin-top: 0; }
+}
+
+/* Tablet kecil & HP */
+@media (max-width: 720px) {
+    /* judul + tombol "Lihat Semua" tetap satu baris (menimpa aturan kolom di atas) */
+    .kartu-kepala.kartu-kepala--sejajar { flex-direction: row; align-items: center; gap: 10px; padding: 16px; }
+    .jadwal-daftar { padding: 0 16px 16px; gap: 10px; }
+    .mendatang-daftar { padding: 2px 16px 14px; }
+    .mendatang-kaki { padding: 2px 16px 16px; }
+    .kartu-ajakan { padding: 20px; margin-top: 12px; }
+}
+
+/* HP */
+@media (max-width: 640px) {
+    .grid, .grid.kolom-4 { gap: 12px; }
+    .grid + .grid { margin-top: 12px; }
+    .statistik { padding: 12px 10px; }
+    .statistik-ikon { width: 32px; height: 32px; margin-bottom: 10px; border-radius: 9px; }
+    .statistik-ikon svg { width: 16px; height: 16px; }
+    .statistik b { font-size: 22px; letter-spacing: -.4px; }
+    .statistik .label { font-size: 12px; line-height: 1.3; margin-top: 5px; overflow-wrap: anywhere; }
+    .statistik .sub { font-size: 10.5px; line-height: 1.35; margin-top: 3px; overflow-wrap: anywhere; }
+}
+
+@media (max-width: 420px) {
+    .grid.kolom-4 { gap: 8px; }
+    .statistik { padding: 10px 8px; }
+    .statistik-ikon { width: 28px; height: 28px; margin-bottom: 8px; }
+    .statistik-ikon svg { width: 15px; height: 15px; }
+    .statistik b { font-size: 20px; }
+    .statistik .label { font-size: 11.5px; }
+    .statistik .sub { font-size: 10px; }
+}
+
+/* HP: tiap sesi = jam + info di atas, status + tombol di baris bawah */
+@media (max-width: 560px) {
+    .jadwal-item { flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px; }
+    .jadwal-jam { flex: 0 0 46px; }
+    .jadwal-jam b { font-size: 15px; }
+    .jadwal-info { flex: 1 1 0; }
+    .jadwal-info b { font-size: 14.5px; }
+    .jadwal-aksi {
+        flex: 0 0 100%; width: 100%; justify-content: space-between;
+        padding-top: 10px; border-top: 1px dashed #D5DED0;
+    }
+    .jadwal-item.selesai .jadwal-aksi { border-top-color: var(--garis); }
+    .jadwal-aksi .tombol { flex: 0 0 auto; min-height: 38px; padding: 8px 20px; }
+}
