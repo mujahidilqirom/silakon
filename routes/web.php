@@ -34,6 +34,9 @@ Route::middleware('auth')->group(function () {
 Route::post('/telegram/webhook', TelegramWebhookController::class)
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
     ->name('telegram.webhook');
+// Endpoint GET hanya untuk pemeriksaan konektivitas di browser; Telegram tetap memakai POST.
+Route::get('/telegram/webhook', fn () => response()->json(['ok' => true, 'message' => 'Webhook endpoint aktif. Telegram mengirim update melalui POST.']))
+    ->name('telegram.webhook.health');
 
 Route::get('/tentang', function () {
     return view('tentang');

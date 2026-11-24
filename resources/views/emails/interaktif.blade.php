@@ -18,7 +18,7 @@
                 @if($status)
                     <div style="display:inline-block;background:#e7f4e9;color:#2f6d42;border:1px solid #c9e6cf;border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;margin-bottom:16px;">{{ $status }}</div>
                 @endif
-                <div style="font-size:14px;color:#435248;white-space:pre-line;">{!! nl2br(e($message)) !!}</div>
+                <div style="font-size:14px;color:#435248;white-space:pre-line;">{!! nl2br(e($bodyMessage ?? '')) !!}</div>
                 @if(count($details))
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:22px 0;background:#f6faf6;border:1px solid #dcebdd;border-radius:12px;">
                         @foreach($details as $label => $value)

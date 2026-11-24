@@ -12,7 +12,7 @@ final class InteractiveMail
 {
     public static function send(string $to, string $subject, array $data = []): void
     {
-        Mail::send('emails.interaktif', array_merge([
+        $payload = array_merge([
             'greeting' => 'Halo,',
             'message' => '',
             'status' => null,
@@ -22,7 +22,12 @@ final class InteractiveMail
             'secondaryUrl' => null,
             'secondaryLabel' => null,
             'quote' => null,
-        ], $data), function ($mail) use ($to, $subject) {
+        ], $data);
+        // Illuminate Mail menyuntikkan variabel $message berisi objek MailMessage
+        // ke view. Jangan memakai nama itu untuk isi pesan aplikasi.
+        $payload['bodyMessage'] = (string) ($payload['message'] ?? '');
+        unset($payload['message']);
+        Mail::send('emails.interaktif', $payload, function ($mail) use ($to, $subject) {
             $mail->to($to)->subject($subject);
         });
     }
