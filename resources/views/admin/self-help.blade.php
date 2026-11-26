@@ -18,6 +18,10 @@
     halaman publik /self-help/{id} di tab baru. Edit / Hapus masih href="#",
     tinggal disambungkan ke route CRUD-nya (mis. admin.self-help.update /
     admin.self-help.destroy).
+
+    Jenis Modul: tiap langkah PDF punya input file sendiri bernama
+    file_pdf_blok[<file_id>], sehingga satu modul bisa berisi banyak PDF.
+    <file_id> juga ada di blok_json (struktur kolom database tidak berubah).
 --}}
 @extends('layouts.admin')
 
@@ -200,32 +204,75 @@
         .sh-q-row .sh-q-col.hal{grid-column:2 / 3;}
     }
 
-    /* ===== Modal: lebar otomatis untuk jenis Modul + tombol simpan menempel di bawah ===== */
-    .sh-modal{transition:max-width .2s ease;}
-    .sh-modal.is-wide{max-width:820px;}
-    .sh-modal-actions{
-        position:sticky;bottom:0;z-index:3;background:#fff;
-        margin:22px -26px -24px;padding:14px 26px;border-top:1px solid #eef1ee;
+    /* ===== Modal (tampilan baru): header tetap, isi bisa di-scroll, tombol simpan selalu terlihat ===== */
+    .sh-modal-overlay{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);}
+    .sh-modal{
+        padding:0;display:flex;flex-direction:column;overflow:hidden;
+        border-radius:20px;max-height:92vh;transition:max-width .2s ease;
     }
+    .sh-modal.is-wide{max-width:860px;}
+    .sh-modal-head{
+        margin:0;padding:18px 24px;border-bottom:1px solid #eaeeea;background:#f8fbf8;
+    }
+    .sh-modal-title{display:flex;align-items:center;gap:12px;min-width:0;}
+    .sh-modal-ic{
+        width:40px;height:40px;border-radius:12px;background:#e3f3e8;color:#2e7d4f;
+        display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    }
+    .sh-modal-ic svg{width:18px;height:18px;}
+    .sh-modal-head h3{font-size:17px;line-height:1.3;}
+    .sh-modal-head small{display:block;margin-top:2px;font-size:12.5px;font-weight:400;color:#7a8a80;}
+    #shFormKonten{display:flex;flex-direction:column;flex:1;min-height:0;}
+    .sh-modal-body{flex:1;min-height:0;overflow-y:auto;padding:22px 24px 6px;}
+    .sh-modal-actions{
+        position:static;margin:0;padding:14px 24px;border-top:1px solid #eaeeea;background:#fff;
+    }
+    .sh-sec-label{
+        display:flex;align-items:center;gap:12px;margin:2px 0 14px;
+        font-size:13px;font-weight:700;color:#3f6a4f;
+    }
+    .sh-sec-label::after{content:"";flex:1;height:1px;background:#e3eae5;}
+    .sh-sec-label:not(:first-child){margin-top:10px;}
 
-    /* ===== Builder langkah modul ===== */
+    /* ===== Builder modul ===== */
+    .sh-mod-head{
+        display:flex;align-items:flex-end;justify-content:space-between;
+        flex-wrap:wrap;gap:12px;margin-bottom:14px;
+    }
+    .sh-mod-head h4{margin:0;font-size:15px;font-weight:700;color:#1f2a24;}
+    .sh-mod-head p{margin:4px 0 0;max-width:520px;font-size:12.5px;line-height:1.55;color:#6b7a72;}
+    .sh-mod-tools{display:flex;align-items:center;gap:8px;}
+    .sh-mod-count{
+        font-size:12px;font-weight:600;color:#3f6a4f;background:#e9f4ec;border:1px solid #cfe8d6;
+        padding:5px 12px;border-radius:999px;white-space:nowrap;
+    }
+    .sh-mod-toggle{
+        font-family:inherit;font-size:12px;font-weight:600;color:#5c6a62;background:#fff;
+        border:1px solid #d8dfda;padding:5px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;
+    }
+    .sh-mod-toggle:hover{background:#f4f7f4;}
+    .sh-mod-toggle[hidden]{display:none;}
+
     .sh-blk-wrap{display:flex;flex-direction:column;gap:12px;}
     .sh-blk-empty{
-        border:1px dashed #c9d8cd;border-radius:12px;padding:26px 16px;text-align:center;
+        border:1px dashed #c9d8cd;border-radius:14px;padding:28px 16px;text-align:center;
         color:#8a978f;font-size:13px;background:#fafcfa;
     }
     .sh-blk{
-        background:#fff;border:1px solid #dfe7e1;border-radius:14px;overflow:hidden;
+        --c:#7fa285;
+        background:#fff;border:1px solid #dfe7e1;border-left:4px solid var(--c);border-radius:14px;
+        overflow:hidden;box-shadow:0 1px 3px rgba(31,42,36,.05);
         transition:box-shadow .15s ease,border-color .15s ease,opacity .15s ease;
     }
+    .sh-blk:hover{box-shadow:0 4px 14px rgba(31,42,36,.08);}
     .sh-blk.is-dragging{opacity:.4;}
     .sh-blk.drop-before{box-shadow:0 -3px 0 #7fa285;}
     .sh-blk.drop-after{box-shadow:0 3px 0 #7fa285;}
-    .sh-blk.is-invalid{border-color:#e4a29b;box-shadow:0 0 0 3px rgba(192,57,43,.08);}
+    .sh-blk.is-invalid{border-color:#e4a29b;border-left-color:#c0392b;box-shadow:0 0 0 3px rgba(192,57,43,.08);}
 
     .sh-blk-head{
         display:flex;align-items:center;gap:10px;padding:10px 12px;
-        background:#f7f9f7;cursor:pointer;user-select:none;
+        background:#fbfcfb;cursor:pointer;user-select:none;
     }
     .sh-blk-handle{
         display:flex;padding:5px 3px;border-radius:6px;color:#a3afa8;cursor:grab;flex-shrink:0;
@@ -234,7 +281,7 @@
     .sh-blk-handle:active{cursor:grabbing;}
     .sh-blk-handle svg{width:14px;height:14px;}
     .sh-blk-no{
-        width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid #d5e0d8;color:#4b5a51;
+        width:24px;height:24px;border-radius:50%;background:var(--c);color:#fff;
         font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;
     }
     .sh-blk-type{
@@ -269,7 +316,7 @@
     }
     .sh-blk textarea.sh-in{resize:vertical;min-height:110px;}
     .sh-blk .sh-in:focus{border-color:#4d7c5f;box-shadow:0 0 0 3px rgba(77,124,95,.12);}
-    .sh-blk-note{margin:0;font-size:12px;color:#8a978f;}
+    .sh-blk-note{margin:0;font-size:12px;color:#8a978f;line-height:1.5;}
     .sh-blk-note.ok{color:#1f7a44;}
     .sh-blk-note.bad{color:#c0392b;}
     .sh-blk-video{
@@ -280,11 +327,75 @@
     .sh-blk-thumb{width:136px;aspect-ratio:16/9;object-fit:cover;border-radius:7px;background:#dfe5e0;flex-shrink:0;}
     .sh-blk-video span{font-size:12.5px;color:#5c6a62;line-height:1.5;}
 
+    /* Daftar pertanyaan dalam satu langkah */
+    .sh-sq-list{display:flex;flex-direction:column;gap:8px;}
+    .sh-sq{
+        display:grid;grid-template-columns:26px 1fr 30px;gap:10px;align-items:start;
+        background:#fffdf4;border:1px solid #f0e3a8;border-radius:11px;padding:10px;
+    }
+    .sh-sq-no{
+        width:26px;height:26px;border-radius:50%;background:#fdf1c2;color:#8a6100;
+        font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:6px;
+    }
+    .sh-blk .sh-sq textarea.sh-in{min-height:0;resize:vertical;}
+    .sh-sq-del{
+        width:30px;height:30px;margin-top:5px;border:none;border-radius:8px;background:#fdeeed;color:#c0392b;
+        cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+    }
+    .sh-sq-del:hover{background:#fadedb;}
+    .sh-sq-del svg{width:14px;height:14px;}
+    .sh-sq-add{
+        width:100%;font-family:inherit;font-size:13px;font-weight:600;color:#8a6100;background:#fff;
+        border:1px dashed #e0c55f;padding:9px 14px;border-radius:9px;cursor:pointer;
+    }
+    .sh-sq-add:hover{background:#fffaf0;}
+
+    /* Unggah PDF per langkah */
+    .sh-pdf-input{display:none;}
+    .sh-pdf-drop{
+        display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;
+        padding:24px 16px;border:2px dashed #cfb9ec;border-radius:12px;background:#faf6ff;
+        cursor:pointer;transition:border-color .15s ease,background .15s ease;
+    }
+    .sh-pdf-drop[hidden]{display:none;}
+    .sh-pdf-drop:hover,.sh-pdf-drop.is-over{border-color:#8b4fd0;background:#f3e8ff;}
+    .sh-pdf-drop-ic{
+        width:42px;height:42px;border-radius:12px;background:#f3e8ff;color:#6b21a8;margin-bottom:4px;
+        display:flex;align-items:center;justify-content:center;
+    }
+    .sh-pdf-drop-ic svg{width:20px;height:20px;}
+    .sh-pdf-drop b{font-size:13.5px;color:#3b1d63;font-weight:600;}
+    .sh-pdf-drop small{font-size:12px;color:#8a978f;}
+    .sh-pdf-card{
+        display:flex;align-items:center;gap:12px;padding:12px;
+        border:1px solid #e3d3f5;background:#faf6ff;border-radius:12px;
+    }
+    .sh-pdf-card[hidden]{display:none;}
+    .sh-pdf-file-ic{
+        width:40px;height:40px;border-radius:10px;background:#f3e8ff;color:#6b21a8;flex-shrink:0;
+        display:flex;align-items:center;justify-content:center;
+    }
+    .sh-pdf-file-ic svg{width:20px;height:20px;}
+    .sh-pdf-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    .sh-pdf-meta b{
+        font-size:13px;font-weight:600;color:#1f2a24;
+        white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .sh-pdf-meta small{font-size:12px;color:#7a8a80;}
+    .sh-pdf-btns{display:flex;gap:6px;flex-shrink:0;}
+    .sh-pdf-btn{
+        display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:12px;font-weight:600;
+        padding:6px 10px;border-radius:8px;border:1px solid #d8dfda;background:#fff;color:#3a463f;cursor:pointer;
+    }
+    .sh-pdf-btn svg{width:13px;height:13px;}
+    .sh-pdf-btn:hover{background:#f4f7f4;}
+    .sh-pdf-btn.is-del{color:#c0392b;border-color:#f6cfcc;background:#fdeeed;}
+    .sh-pdf-btn.is-del:hover{background:#fadedb;}
+
     /* Pemilih jenis langkah */
-    .sh-add-bar{margin-top:14px;border:1px dashed #b7cbbc;border-radius:12px;padding:14px;background:#f8fbf8;}
+    .sh-add-bar{margin-top:14px;border:1px dashed #b7cbbc;border-radius:14px;padding:14px;background:#f8fbf8;}
     .sh-add-bar p{margin:0 0 10px;font-size:12.5px;font-weight:600;color:#3f6a4f;}
-    .sh-add-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-    @media (max-width:700px){ .sh-add-grid{grid-template-columns:1fr 1fr;} }
+    .sh-add-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;}
     .sh-add-btn{
         display:flex;align-items:center;gap:10px;padding:10px;text-align:left;
         background:#fff;border:1px solid #d8dfda;border-radius:10px;cursor:pointer;font-family:inherit;
@@ -298,8 +409,12 @@
     .sh-add-txt b{font-size:13px;color:#1f2a24;font-weight:600;line-height:1.3;}
     .sh-add-txt small{font-size:11.5px;color:#8a978f;line-height:1.35;}
     @media (max-width:480px){
+        .sh-modal-body{padding:18px 16px 4px;}
+        .sh-modal-head,.sh-modal-actions{padding-left:16px;padding-right:16px;}
         .sh-blk-thumb{width:96px;}
         .sh-blk-type span.sh-blk-type-label{display:none;}
+        .sh-pdf-card{flex-wrap:wrap;}
+        .sh-pdf-btns{width:100%;}
     }
 </style>
 
@@ -412,13 +527,24 @@
 <div class="sh-modal-overlay {{ $errors->any() ? 'is-open' : '' }}" id="shModalTambah">
     <div class="sh-modal">
         <div class="sh-modal-head">
-        <h3 id="shModalTitle">Tambah Konten Self Help</h3>
-            <button type="button" class="sh-modal-close" onclick="shCloseModal()">&times;</button>
+            <div class="sh-modal-title">
+                <span class="sh-modal-ic">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                </span>
+                <div>
+                    <h3 id="shModalTitle">Tambah Konten Self Help</h3>
+                    <small>Pilih jenis konten, lalu lengkapi isiannya.</small>
+                </div>
+            </div>
+            <button type="button" class="sh-modal-close" onclick="shCloseModal()" aria-label="Tutup">&times;</button>
         </div>
 
         <form id="shFormKonten" method="POST" action="{{ route('admin.self-help.store') }}" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="_method" id="shFormMethod" value="POST">
+
+            <div class="sh-modal-body">
+            <div class="sh-sec-label">Informasi dasar</div>
 
             <div class="sh-form-group">
                 <label>Judul</label>
@@ -446,6 +572,8 @@
                     @error('topik') <p class="sh-form-error">{{ $message }}</p> @enderror
                 </div>
             </div>
+
+            <div class="sh-sec-label">Isi konten</div>
 
             {{-- ===== ARTIKEL ===== --}}
             <div class="sh-tipe-section" data-tipe="Artikel">
@@ -515,20 +643,31 @@
 
             {{-- ===== MODUL TERPADU ===== --}}
             <div class="sh-tipe-section" data-tipe="Modul" style="display:none;">
-                <div class="sh-form-group">
-                    <label>Isi modul</label>
-                    <p class="sh-hint">Susun materi langkah demi langkah. Konseli melihatnya berurutan dari atas ke bawah. Seret ikon titik di kiri atau pakai tombol panah untuk mengubah urutan.</p>
-                    <input type="hidden" name="blok_json" id="shBlokJson" value="{{ old('blok_json', '[]') }}">
-                    <div class="sh-blk-wrap" id="shBlokList"></div>
-                    <div class="sh-blk-empty" id="shBlokEmpty">Belum ada langkah. Pilih jenis langkah di bawah untuk memulai.</div>
-                    <p class="sh-form-error" id="shBlokError" style="display:none;"></p>
-                    @error('blok_json') <p class="sh-form-error">{{ $message }}</p> @enderror
-                    <div class="sh-add-bar">
-                        <p>Tambah langkah</p>
-                        <div class="sh-add-grid" id="shAddGrid"></div>
+                <div class="sh-mod-head">
+                    <div>
+                        <h4>Susun isi modul</h4>
+                        <p>Konseli melihat langkah secara berurutan dari atas ke bawah. Seret ikon titik atau pakai tombol panah untuk mengubah urutan. Setiap langkah PDF punya file sendiri, jadi satu modul boleh berisi lebih dari satu PDF.</p>
+                    </div>
+                    <div class="sh-mod-tools">
+                        <span class="sh-mod-count" id="shBlokCount">0 langkah</span>
+                        <button type="button" class="sh-mod-toggle" id="shBlokToggle" hidden>Ciutkan semua</button>
                     </div>
                 </div>
+
+                <input type="hidden" name="blok_json" id="shBlokJson" value="{{ old('blok_json', '[]') }}">
+                <div class="sh-blk-wrap" id="shBlokList"></div>
+                <div class="sh-blk-empty" id="shBlokEmpty">Belum ada langkah. Pilih jenis langkah di bawah untuk memulai.</div>
+                <p class="sh-form-error" id="shBlokError" style="display:none;"></p>
+                @error('blok_json') <p class="sh-form-error">{{ $message }}</p> @enderror
+                @error('file_pdf_blok.*') <p class="sh-form-error">{{ $message }}</p> @enderror
+
+                <div class="sh-add-bar">
+                    <p>Tambah langkah</p>
+                    <div class="sh-add-grid" id="shAddGrid"></div>
+                </div>
             </div>
+
+            <div class="sh-sec-label">Publikasi</div>
 
             <div class="sh-form-group">
                 <label>Status</label>
@@ -540,6 +679,8 @@
                 <p class="sh-hint">Tanggal terisi otomatis sesuai hari konten ini ditambahkan.</p>
                 @error('status') <p class="sh-form-error">{{ $message }}</p> @enderror
             </div>
+
+            </div>{{-- /.sh-modal-body --}}
 
             <div class="sh-modal-actions">
                 <button type="button" class="sh-btn-outline" onclick="shCloseModal()">Batal</button>
@@ -705,8 +846,12 @@
         form = document.getElementById('shFormKonten'),
         empty = document.getElementById('shBlokEmpty'),
         errBox = document.getElementById('shBlokError'),
-        grid = document.getElementById('shAddGrid');
+        grid = document.getElementById('shAddGrid'),
+        countEl = document.getElementById('shBlokCount'),
+        toggleBtn = document.getElementById('shBlokToggle');
     if (!list || !hidden || !form) return;
+
+    var MAX_PDF = 10 * 1024 * 1024, uidSeq = 0, dragEl = null;
 
     function svg(path, fill) {
         return '<svg viewBox="0 0 24 24" fill="' + (fill ? 'currentColor' : 'none') + '" stroke="' + (fill ? 'none' : 'currentColor') +
@@ -717,10 +862,15 @@
         up: svg('<path d="M12 19V5M5 12l7-7 7 7"/>'),
         down: svg('<path d="M12 5v14M19 12l-7 7-7-7"/>'),
         del: svg('<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/>'),
-        chev: svg('<path d="m6 9 6 6 6-6"/>')
+        chev: svg('<path d="m6 9 6 6 6-6"/>'),
+        upload: svg('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>'),
+        swap: svg('<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>'),
+        x: svg('<path d="M18 6 6 18M6 6l12 12"/>')
     };
 
-    // Format data (blok_json) sama seperti sebelumnya: {tipe, judul, isi|url|pertanyaan|instruksi}
+    // Format blok_json: {tipe, judul, isi|url|pertanyaan|instruksi, keterangan (video)}.
+    // Langkah PDF: {tipe:'pdf', judul, file_pdf (path lama), file_id, nama_file, jumlah_halaman}.
+    // File PDF-nya dikirim terpisah sebagai file_pdf_blok[file_id].
     var TYPES = {
         teks: {
             label: 'Teks', desc: 'Penjelasan atau artikel', key: 'isi', bg: '#e3f3e8', fg: '#1f7a44',
@@ -739,8 +889,8 @@
             label: 'Pertanyaan', desc: 'Konseli menjawab sendiri', key: 'pertanyaan', bg: '#fdf1c2', fg: '#8a6100',
             icon: svg('<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'),
             judulPh: 'mis. Refleksi diri',
-            bodyLabel: 'Pertanyaan untuk konseli', bodyPh: 'mis. Apa yang kamu rasakan saat situasi itu terjadi?',
-            note: 'Konseli menjawab lewat kolom isian di bawah pertanyaan ini.'
+            bodyLabel: 'Daftar pertanyaan', bodyPh: '',
+            note: 'Satu langkah boleh berisi beberapa pertanyaan. Konseli menjawab tiap pertanyaan pada kolom isian sendiri. Tekan Enter untuk menambah pertanyaan berikutnya.'
         },
         kegiatan: {
             label: 'Kegiatan', desc: 'Tugas atau latihan', key: 'instruksi', bg: '#ece6fa', fg: '#5b3fa0',
@@ -748,26 +898,106 @@
             judulPh: 'mis. Latihan menulis jurnal',
             bodyLabel: 'Instruksi kegiatan', bodyPh: 'mis. Tarik napas 4 hitungan, tahan 4 hitungan, hembuskan 6 hitungan. Ulangi selama 3 menit.',
             note: 'Tulis langkah-langkahnya sejelas mungkin supaya mudah diikuti sendiri.'
+        },
+        pdf: {
+            label: 'PDF', desc: 'Dokumen yang dibaca konseli', key: 'file_pdf', bg: '#f3e8ff', fg: '#6b21a8',
+            icon: svg('<path d="M6 2h9l3 3v17H6z"/><path d="M15 2v4h4M8 13h8M8 17h6"/>'),
+            judulPh: 'mis. Lembar latihan bagian 1',
+            note: 'Format PDF, maksimal 10 MB per file. Untuk PDF lain, tambahkan langkah PDF baru.'
         }
     };
-    var ORDER = ['teks', 'video', 'soal', 'kegiatan'];
+    var ORDER = ['teks', 'pdf', 'video', 'soal', 'kegiatan'];
 
+    /* ---------- helper ---------- */
     function ytId(u) {
         var m = String(u || '').trim().match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:[^#]*&)?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
         return m ? m[1] : '';
+    }
+    function basename(p) { return String(p || '').split(/[\\/]/).pop(); }
+    function fmtSize(n) {
+        if (n >= 1048576) return (n / 1048576).toFixed(1).replace('.', ',') + ' MB';
+        return Math.max(1, Math.round(n / 1024)) + ' KB';
+    }
+    function newUid() { uidSeq++; return 'f' + Date.now().toString(36) + uidSeq; }
+    function field(row, f) { return row.querySelector('[data-f="' + f + '"]'); }
+    function fileOf(row) {
+        var i = field(row, 'file');
+        return i && i.files && i.files[0] ? i.files[0] : null;
+    }
+    // Langkah Pertanyaan: beberapa pertanyaan disimpan ke satu nilai 'pertanyaan',
+    // dipisah satu baris per pertanyaan (format sama seperti sebelumnya).
+    function qList(row) { return row.querySelector('[data-qlist]'); }
+    function qRenumber(row) {
+        var items = qList(row).querySelectorAll('.sh-sq');
+        items.forEach(function (it, i) {
+            it.querySelector('.sh-sq-no').textContent = i + 1;
+            it.querySelector('.sh-sq-del').style.visibility = items.length > 1 ? 'visible' : 'hidden';
+        });
+    }
+    function qAdd(row, text, after) {
+        var it = document.createElement('div');
+        it.className = 'sh-sq';
+        it.innerHTML = '<span class="sh-sq-no"></span>' +
+            '<textarea class="sh-in" data-q rows="2" placeholder="Tulis pertanyaan..."></textarea>' +
+            '<button type="button" class="sh-sq-del" title="Hapus pertanyaan" aria-label="Hapus pertanyaan">' + ICON.x + '</button>';
+        var ta = it.querySelector('textarea');
+        ta.value = text || '';
+        ta.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter' || e.isComposing) return;
+            e.preventDefault();
+            qAdd(row, '', it).focus();
+            sync();
+        });
+        it.querySelector('.sh-sq-del').addEventListener('click', function () {
+            if (qList(row).querySelectorAll('.sh-sq').length > 1) it.remove(); else ta.value = '';
+            qRenumber(row); updateSum(row); sync();
+        });
+        var box = qList(row);
+        box.insertBefore(it, after ? after.nextSibling : null);
+        qRenumber(row);
+        return ta;
+    }
+    function qValue(row) {
+        return Array.prototype.map.call(qList(row).querySelectorAll('[data-q]'), function (t) {
+            return t.value.replace(/\s*\n+\s*/g, ' ').trim();
+        }).filter(Boolean).join('\n');
+    }
+    function bodyValue(row) {
+        return row.dataset.tipe === 'soal' ? qValue(row) : field(row, 'body').value;
+    }
+
+    function showError(msg) { errBox.textContent = msg; errBox.style.display = msg ? '' : 'none'; }
+
+    /* ---------- sinkronisasi ke input hidden ---------- */
+    function refreshCount() {
+        var n = list.querySelectorAll('.sh-blk').length,
+            pdfs = list.querySelectorAll('.sh-blk[data-tipe="pdf"]').length;
+        if (countEl) countEl.textContent = n + ' langkah' + (pdfs ? ' · ' + pdfs + ' PDF' : '');
+        if (toggleBtn) {
+            toggleBtn.hidden = n < 2;
+            toggleBtn.textContent = list.querySelector('.sh-blk:not(.is-collapsed)') ? 'Ciutkan semua' : 'Buka semua';
+        }
     }
 
     function sync() {
         var out = [];
         list.querySelectorAll('.sh-blk').forEach(function (row) {
-            var tipe = row.dataset.tipe, b = { tipe: tipe, judul: row.querySelector('[data-f="judul"]').value };
-            b[TYPES[tipe].key] = row.querySelector('[data-f="body"]').value;
+            var tipe = row.dataset.tipe, b = { tipe: tipe, judul: field(row, 'judul').value };
+            if (tipe === 'pdf') {
+                var p = row._pdf, f = fileOf(row);
+                b.file_pdf = p.path || '';
+                b.file_id = row.dataset.uid;
+                b.nama_file = f ? f.name : (p.nama || '');
+                b.jumlah_halaman = p.halaman || 0;
+            } else {
+                b[TYPES[tipe].key] = bodyValue(row);
+                if (tipe === 'video') { var d = field(row, 'desc'); b.keterangan = d ? d.value : ''; }
+            }
             out.push(b);
         });
         hidden.value = JSON.stringify(out);
+        refreshCount();
     }
-
-    function showError(msg) { errBox.textContent = msg; errBox.style.display = msg ? '' : 'none'; }
 
     function renumber() {
         var rows = list.querySelectorAll('.sh-blk');
@@ -779,22 +1009,33 @@
         empty.style.display = rows.length ? 'none' : '';
     }
 
+    function pdfName(row) {
+        var f = fileOf(row), p = row._pdf;
+        return f ? f.name : (p.nama || basename(p.path));
+    }
+
     function updateSum(row) {
-        var judul = row.querySelector('[data-f="judul"]').value.trim();
-        var body = row.querySelector('[data-f="body"]').value.replace(/\s+/g, ' ').trim();
+        var tipe = row.dataset.tipe, judul = field(row, 'judul').value.trim(), text = judul, suffix = '';
+        if (tipe === 'soal') {
+            var qs = qValue(row).split('\n').filter(Boolean);
+            if (!text) text = qs[0] || '';
+            if (qs.length > 1) suffix = ' (' + qs.length + ' pertanyaan)';
+        } else if (!text) {
+            text = tipe === 'pdf'
+                ? pdfName(row)
+                : field(row, 'body').value.replace(/\s+/g, ' ').trim();
+        }
+        if (text.length > 80) text = text.slice(0, 80) + '...';
+        text += text ? suffix : '';
         var sum = row.querySelector('[data-sum]');
-        var text = judul || body;
-        if (text.length > 90) text = text.slice(0, 90) + '...';
         sum.textContent = text || 'Belum diisi';
         sum.classList.toggle('is-empty', !text);
     }
 
     function updateVideo(row) {
-        var input = row.querySelector('[data-f="body"]');
-        var box = row.querySelector('[data-video]');
-        var note = row.querySelector('[data-vnote]');
+        var box = row.querySelector('[data-video]'), note = row.querySelector('[data-vnote]');
         if (!box) return;
-        var v = input.value.trim(), id = ytId(v);
+        var v = field(row, 'body').value.trim(), id = ytId(v);
         if (id) {
             box.hidden = false;
             box.querySelector('img').src = 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg';
@@ -807,19 +1048,129 @@
         }
     }
 
-    function build(tipe) {
+    /* ---------- PDF per langkah ---------- */
+    function setPnote(row, msg, cls) {
+        var n = row.querySelector('[data-pnote]');
+        if (!n) return;
+        n.textContent = msg;
+        n.className = 'sh-blk-note' + (cls ? ' ' + cls : '');
+    }
+
+    function paintPdf(row) {
+        var p = row._pdf, f = fileOf(row), ada = !!(f || p.path);
+        row.querySelector('[data-drop]').hidden = ada;
+        row.querySelector('[data-card]').hidden = !ada;
+        if (!ada) return;
+        row.querySelector('[data-pname]').textContent = pdfName(row);
+        var info = [f ? fmtSize(f.size) : 'Tersimpan sebelumnya'];
+        if (p.halaman) info.push(p.halaman + ' halaman');
+        row.querySelector('[data-pinfo]').textContent = info.join(' · ');
+    }
+
+    function readPages(row, file) {
+        if (!window.pdfjsLib) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+            window.pdfjsLib.getDocument({ data: new Uint8Array(reader.result) }).promise.then(function (pdf) {
+                if (fileOf(row) !== file) return;
+                row._pdf.halaman = pdf.numPages;
+                paintPdf(row); sync();
+            }).catch(function () {});
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function onFile(row, file) {
+        var p = row._pdf, inp = field(row, 'file');
+        if (!file) {
+            if (!p.path) { p.nama = ''; p.halaman = 0; }
+            paintPdf(row); updateSum(row); sync();
+            return;
+        }
+        if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+            inp.value = '';
+            setPnote(row, 'File harus berformat PDF.', 'bad');
+        } else if (file.size > MAX_PDF) {
+            inp.value = '';
+            setPnote(row, 'Ukuran file ' + fmtSize(file.size) + ' melebihi batas 10 MB.', 'bad');
+        } else {
+            p.nama = file.name; p.halaman = 0;
+            row.classList.remove('is-invalid');
+            setPnote(row, TYPES.pdf.note, '');
+            readPages(row, file);
+        }
+        paintPdf(row); updateSum(row); sync();
+    }
+
+    function wirePdf(row) {
+        var inp = field(row, 'file'), drop = row.querySelector('[data-drop]');
+        inp.addEventListener('change', function () { onFile(row, inp.files && inp.files[0]); });
+        row.querySelector('[data-pdel]').addEventListener('click', function () {
+            inp.value = '';
+            row._pdf.path = ''; row._pdf.nama = ''; row._pdf.halaman = 0;
+            setPnote(row, TYPES.pdf.note, '');
+            paintPdf(row); updateSum(row); sync();
+        });
+        ['dragenter', 'dragover'].forEach(function (ev) {
+            drop.addEventListener(ev, function (e) {
+                if (dragEl) return;
+                e.preventDefault();
+                drop.classList.add('is-over');
+            });
+        });
+        drop.addEventListener('dragleave', function () { drop.classList.remove('is-over'); });
+        drop.addEventListener('drop', function (e) {
+            if (dragEl) return;
+            e.preventDefault();
+            drop.classList.remove('is-over');
+            var files = e.dataTransfer && e.dataTransfer.files;
+            if (!files || !files.length) return;
+            try { inp.files = files; } catch (err) { return; }
+            onFile(row, inp.files[0]);
+        });
+    }
+
+    /* ---------- membangun satu langkah ---------- */
+    function build(tipe, uid) {
         var t = TYPES[tipe];
         var row = document.createElement('div');
         row.className = 'sh-blk';
         row.dataset.tipe = tipe;
+        row.dataset.uid = uid;
+        row.style.setProperty('--c', t.fg);
 
         var bodyField;
         if (tipe === 'video') {
             bodyField =
                 '<div class="sh-blk-field"><label>' + t.bodyLabel + '</label>' +
                 '<input class="sh-in" data-f="body" type="text" inputmode="url" autocomplete="off" placeholder="' + t.bodyPh + '">' +
+                '<label>Keterangan video</label><textarea class="sh-in" data-f="desc" rows="3" placeholder="Jelaskan isi atau tujuan video ini..."></textarea>' +
                 '<p class="sh-blk-note" data-vnote></p></div>' +
                 '<div class="sh-blk-video" data-video hidden><img alt="" class="sh-blk-thumb"><span>Pratinjau video. Pastikan video ini boleh disematkan.</span></div>';
+        } else if (tipe === 'soal') {
+            bodyField =
+                '<div class="sh-blk-field"><label>' + t.bodyLabel + '</label>' +
+                '<div class="sh-sq-list" data-qlist></div>' +
+                '<button type="button" class="sh-sq-add" data-qadd>+ Tambah pertanyaan</button>' +
+                '<p class="sh-blk-note">' + t.note + '</p></div>';
+        } else if (tipe === 'pdf') {
+            var id = 'shPdf_' + uid;
+            bodyField =
+                '<div class="sh-blk-field"><label>File PDF</label>' +
+                '<input class="sh-pdf-input" data-f="file" type="file" id="' + id + '" name="file_pdf_blok[' + uid + ']" accept="application/pdf">' +
+                '<label class="sh-pdf-drop" for="' + id + '" data-drop>' +
+                    '<span class="sh-pdf-drop-ic">' + ICON.upload + '</span>' +
+                    '<b>Pilih file PDF</b><small>atau seret file ke sini. Maksimal 10 MB.</small>' +
+                '</label>' +
+                '<div class="sh-pdf-card" data-card hidden>' +
+                    '<span class="sh-pdf-file-ic">' + t.icon + '</span>' +
+                    '<span class="sh-pdf-meta"><b data-pname></b><small data-pinfo></small></span>' +
+                    '<span class="sh-pdf-btns">' +
+                        '<label class="sh-pdf-btn" for="' + id + '">' + ICON.swap + 'Ganti</label>' +
+                        '<button type="button" class="sh-pdf-btn is-del" data-pdel>' + ICON.x + 'Hapus</button>' +
+                    '</span>' +
+                '</div>' +
+                '<p class="sh-blk-note" data-pnote>' + t.note + '</p></div>';
         } else {
             bodyField =
                 '<div class="sh-blk-field"><label>' + t.bodyLabel + '</label>' +
@@ -848,16 +1199,33 @@
         return row;
     }
 
-    function add(b) {
+    function add(b, collapsed) {
         b = b || {};
-        var tipe = TYPES[b.tipe] ? b.tipe : 'teks';
-        var row = build(tipe);
+        var tipe = TYPES[b.tipe] ? b.tipe : 'teks', t = TYPES[tipe];
+        var row = build(tipe, b.file_id || newUid());
         list.appendChild(row);
 
-        row.querySelector('[data-f="judul"]').value = b.judul || '';
-        row.querySelector('[data-f="body"]').value = b[TYPES[tipe].key] || '';
+        field(row, 'judul').value = b.judul || '';
+        if (tipe === 'pdf') {
+            row._pdf = { path: b.file_pdf || '', nama: b.nama_file || '', halaman: parseInt(b.jumlah_halaman, 10) || 0 };
+            wirePdf(row);
+            paintPdf(row);
+        } else if (tipe === 'soal') {
+            var qs = String(b.pertanyaan || '').split(/\r?\n/).map(function (q) { return q.trim(); }).filter(Boolean);
+            if (!qs.length) qs = [''];
+            qs.forEach(function (q) { qAdd(row, q); });
+            row.querySelector('[data-qadd]').addEventListener('click', function () {
+                var items = qList(row).querySelectorAll('.sh-sq');
+                qAdd(row, '', items[items.length - 1]).focus();
+                sync();
+            });
+        } else {
+            field(row, 'body').value = b[t.key] || '';
+            if (tipe === 'video' && field(row, 'desc')) field(row, 'desc').value = b.keterangan || '';
+            updateVideo(row);
+        }
         updateSum(row);
-        updateVideo(row);
+        if (collapsed) row.classList.add('is-collapsed');
 
         row.addEventListener('input', function () {
             row.classList.remove('is-invalid');
@@ -868,6 +1236,7 @@
         row.querySelector('[data-head]').addEventListener('click', function (e) {
             if (e.target.closest('[data-tool]') || e.target.closest('[data-handle]')) return;
             row.classList.toggle('is-collapsed');
+            refreshCount();
         });
         row.querySelector('[data-del]').addEventListener('click', function () {
             row.remove(); renumber(); sync();
@@ -886,6 +1255,7 @@
         handle.addEventListener('mousedown', function () { row.draggable = true; });
         handle.addEventListener('mouseup', function () { row.draggable = false; });
         row.addEventListener('dragstart', function (e) {
+            if (e.target !== row) return;
             dragEl = row;
             row.classList.add('is-dragging');
             e.dataTransfer.effectAllowed = 'move';
@@ -901,7 +1271,6 @@
         return row;
     }
 
-    var dragEl = null;
     function clearDrop() {
         list.querySelectorAll('.drop-before, .drop-after').forEach(function (r) { r.classList.remove('drop-before', 'drop-after'); });
     }
@@ -929,7 +1298,7 @@
         clearDrop();
     });
 
-    // Tombol pemilih jenis langkah
+    /* ---------- tombol tambah langkah ---------- */
     ORDER.forEach(function (key) {
         var t = TYPES[key];
         var btn = document.createElement('button');
@@ -941,17 +1310,27 @@
         grid.appendChild(btn);
     });
 
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+            var anyOpen = !!list.querySelector('.sh-blk:not(.is-collapsed)');
+            list.querySelectorAll('.sh-blk').forEach(function (r) { r.classList.toggle('is-collapsed', anyOpen); });
+            refreshCount();
+        });
+    }
+
     window.shTambahBlok = function (tipe) {
         var row = add({ tipe: TYPES[tipe] ? tipe : 'teks' });
         showError('');
         renumber(); sync();
         row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        row.querySelector('[data-f="judul"]').focus({ preventScroll: true });
+        field(row, 'judul').focus({ preventScroll: true });
     };
     window.shMuatBlok = function (items) {
         list.innerHTML = '';
         showError('');
-        (Array.isArray(items) ? items : []).forEach(add);
+        var arr = Array.isArray(items) ? items : [];
+        var collapse = arr.length > 2;
+        arr.forEach(function (b) { add(b, collapse); });
         renumber(); sync();
     };
 
@@ -968,22 +1347,33 @@
         }
         var first = null;
         rows.forEach(function (r) {
-            var kosong = r.querySelector('[data-f="body"]').value.trim() === '';
+            var kosong;
+            if (r.dataset.tipe === 'pdf') {
+                kosong = !fileOf(r) && !r._pdf.path;
+                if (kosong) setPnote(r, 'Pilih file PDF untuk langkah ini.', 'bad');
+            } else {
+                kosong = bodyValue(r).trim() === '';
+            }
             r.classList.toggle('is-invalid', kosong);
             if (kosong && !first) first = r;
         });
         if (first) {
             e.preventDefault();
             first.classList.remove('is-collapsed');
+            refreshCount();
             showError('Ada langkah yang belum diisi. Lengkapi atau hapus langkah yang ditandai merah.');
             first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            first.querySelector('[data-f="body"]').focus({ preventScroll: true });
+            var target = first.dataset.tipe === 'pdf' ? field(first, 'judul')
+                : first.dataset.tipe === 'soal' ? qList(first).querySelector('[data-q]')
+                : field(first, 'body');
+            target.focus({ preventScroll: true });
         } else {
             showError('');
         }
     });
 
     try { window.shMuatBlok(JSON.parse(hidden.value || '[]')); } catch (e) { window.shMuatBlok([]); }
+    if (window.shApplyTipe) window.shApplyTipe();
 })();
 </script>
 

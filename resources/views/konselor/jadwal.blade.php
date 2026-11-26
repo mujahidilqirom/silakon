@@ -76,7 +76,6 @@
                     <tr>
                         <th class="kolom-no">No</th>
                         <th>Konseli</th>
-                        <th>Kategori</th>
                         <th>Tanggal</th>
                         <th>Waktu</th>
                         <th>Lokasi</th>
@@ -94,9 +93,6 @@
                                 </div>
                                 <div class="sel-sub">{{ $item['nim'] }}</div>
                                 <div class="sel-sub">{{ $item['prodi'] }}</div>
-                            </td>
-                            <td>
-                                <span class="lencana lencana-kategori">{{ $item['kategori'] }}</span>
                             </td>
                             <td>{{ $item['hari'] }}, {{ $item['tanggal'] }}</td>
                             <td class="jadwal-waktu">{{ $item['jam'] }} WIB</td>
@@ -397,7 +393,6 @@
                                 '<b>' + a.nama + '</b>' +
                                 '<span class="sel-sub">' + a.nim + ' &middot; ' + a.prodi + '</span>' +
                             '</div>' +
-                            '<span class="lencana lencana-kategori">' + a.kategori + '</span>' +
                             '<span class="kalender-detail-jam">' + a.jam + ' WIB</span>' +
                             '<span class="sel-sub">' + a.lokasi + '</span>' +
                             '<span class="lencana lencana-status-' + a.status.toLowerCase() + '">' + a.status + '</span>' +

@@ -6,9 +6,9 @@
     <title>@yield('title', 'SILAKON — LPPP UNNES')</title>
     <meta name="description" content="SILAKON menghadirkan sistem layanan konseling digital yang profesional, mudah diakses, dan terpercaya untuk seluruh civitas akademika UNNES.">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="icon" href="{{ asset('favicon.ico') }}">
 
+    <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     @stack('styles')

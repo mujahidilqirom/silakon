@@ -116,14 +116,14 @@ class PengajuanController extends Controller
                 'berlaku_sampai' => now()->addHours(24),
             ]);
             $link = route('konseling.wali.verifikasi', $token);
-            InteractiveMail::send($targetEmail, 'Persetujuan Pengajuan Konseling', [
-                'greeting' => 'Ada pengajuan konseling yang ditujukan kepada Anda',
-                'message' => 'Seseorang telah mengajukan layanan konseling terkait Anda. Silakan tinjau pengajuan ini, berikan persetujuan, lalu isi WHO-5 secara mandiri. Tautan berlaku selama 24 jam.',
-                'status' => 'Menunggu persetujuan',
-                'actionUrl' => $link,
-                'actionLabel' => 'Tinjau Pengajuan',
-                'quote' => 'Cerita Anda layak didengar dengan aman dan penuh hormat.',
-            ]);
+            try {
+                InteractiveMail::send($targetEmail, 'Persetujuan Pengajuan Konseling', [
+                    'greeting' => 'Ada pengajuan konseling yang ditujukan kepada Anda',
+                    'message' => 'Seseorang telah mengajukan layanan konseling terkait Anda. Silakan tinjau pengajuan ini, berikan persetujuan, lalu isi WHO-5 secara mandiri. Tautan berlaku selama 24 jam.',
+                    'status' => 'Menunggu persetujuan', 'actionUrl' => $link, 'actionLabel' => 'Tinjau Pengajuan',
+                    'quote' => 'Cerita Anda layak didengar dengan aman dan penuh hormat.',
+                ]);
+            } catch (\Throwable $e) { report($e); }
             return response()->view('konseling.wali-menunggu', ['email' => $targetEmail]);
         }
 
@@ -320,6 +320,9 @@ class PengajuanController extends Controller
             'kondisi_darurat' => ['required', 'in:ya,tidak'],
             'konfirmasi_darurat' => ['accepted_if:kondisi_darurat,ya'],
             'deskripsi_masalah' => ['required', 'string', 'max:5000'],
+            'lingkup_hambatan' => ['required', 'array', 'min:1'],
+            'lingkup_hambatan.*' => ['string', 'max:100'],
+            'lingkup_hambatan_lainnya' => ['required_if:lingkup_hambatan.*,Yang lain', 'nullable', 'string', 'max:150'],
             'verification_code' => [$type === 'wali_mahasiswa' && $request->input('wali_subjek_konseling') === 'mahasiswa' ? 'nullable' : 'required', 'digits:6'],
             $emailField => ['required', 'email'],
             'who5' => [$type === 'wali_mahasiswa' && $request->input('wali_subjek_konseling') === 'mahasiswa' ? 'nullable' : 'required', 'array', 'size:5'],

@@ -137,43 +137,90 @@
         border-color: #16a34a !important;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") !important;
     }
+    /* Kotak konfirmasi darurat: checkbox | ikon | teks, sejajar rapi dalam satu baris */
     .konseling-darurat-confirm {
-        align-items: flex-start !important;
-        gap: 12px !important;
-        padding: 14px 16px !important;
+        display: grid !important;
+        grid-template-columns: 20px 22px minmax(0, 1fr);
+        align-items: start !important;
+        column-gap: 12px !important;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 16px 18px !important;
         margin-top: 12px;
-        border-color: #f2c6c6 !important;
+        border: 1px solid #f2c6c6 !important;
+        border-radius: 14px !important;
         background: linear-gradient(135deg, #fff8f8 0%, #fff 100%) !important;
         color: #7f1d1d !important;
         box-shadow: 0 5px 16px rgba(153, 27, 27, .06);
+        cursor: pointer;
     }
     .konseling-darurat-confirm:hover,
     .konseling-darurat-confirm:has(input:checked) {
         border-color: #dc8f8f !important;
         background: #fff3f3 !important;
     }
+    .konseling-darurat-confirm > input[type="checkbox"] { margin: 1px 0 0 !important; }
     .konseling-darurat-confirm > svg {
-        width: 21px;
-        height: 21px;
-        flex: 0 0 auto;
-        margin-top: 1px;
+        width: 22px;
+        height: 22px;
+        margin-top: 0;
         color: #b42318;
     }
-    .konseling-darurat-confirm > input[type="checkbox"] { margin-top: 2px !important; }
     .konseling-darurat-confirm .konseling-emergency-copy {
         display: grid;
-        gap: 3px;
-        line-height: 1.45;
+        gap: 4px;
+        min-width: 0;
+        line-height: 1.5;
     }
     .konseling-darurat-confirm .konseling-emergency-copy strong {
         color: #991b1b;
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: 700;
     }
     .konseling-darurat-confirm .konseling-emergency-copy span {
         color: #7f1d1d;
-        font-size: 12.5px;
+        font-size: 13px;
         font-weight: 400;
     }
+
+    /* Kotak info/peringatan: ikon kiri, teks mengalir normal di kanan (spasi antar kata terjaga) */
+    .konseling-callout {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        column-gap: 12px;
+        align-items: start;
+        box-sizing: border-box;
+        width: 100%;
+        margin-top: 12px;
+        padding: 14px 16px;
+        border: 1px solid #cfe3d5;
+        border-radius: 12px;
+        background: #f4faf6;
+        color: #2f5d44;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    .konseling-callout > svg { width: 20px; height: 20px; margin-top: 1px; color: currentColor; }
+    .konseling-callout > div,
+    .konseling-callout > span { display: block; min-width: 0; }
+    .konseling-callout strong { font-weight: 700; }
+    .konseling-callout.is-danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .konseling-callout.is-danger a { color: inherit; font-weight: 700; text-decoration: underline; }
+    .konseling-callout[hidden] { display: none !important; }
+
+    /* Kolom "lingkup hambatan lainnya": tampil sebagai panel kecil di bawah pilihan */
+    .konseling-other-field {
+        grid-column: 1 / -1;
+        margin-top: 14px !important;
+        padding: 14px 16px 12px;
+        border: 1px solid #dfe9e2;
+        border-left: 3px solid #16a34a;
+        border-radius: 12px;
+        background: #f9fcfa;
+    }
+    .konseling-other-field > label { display: block; margin: 0 0 8px; font-size: 13.5px; font-weight: 600; }
+    .konseling-other-field > input { width: 100%; box-sizing: border-box; background: #fff; }
+    .konseling-other-field > .konseling-hint { display: block; margin-top: 8px; font-size: 12px; line-height: 1.4; }
     /* Atribut hidden harus menang atas display:flex dari .konseling-check. */
     .konseling-darurat-confirm[hidden],
     [data-darurat-alert][hidden] {
@@ -505,10 +552,13 @@
                             <div class="konseling-field full">
                                 <label>Yang akan melakukan konseling <span class="konseling-required">*</span></label>
                                 <div class="konseling-options">
-                                    <label class="konseling-option-card"><input class="konseling-control" type="radio" name="wali_subjek_konseling" value="wali" required><span><strong>Wali</strong><span>Saya sendiri yang membutuhkan konseling.</span></span></label>
+                                    <label class="konseling-option-card"><input class="konseling-control" type="radio" name="wali_subjek_konseling" value="wali" required><span><strong>Wali mahasiswa</strong><span>Saya sendiri yang membutuhkan konseling.</span></span></label>
                                     <label class="konseling-option-card"><input class="konseling-control" type="radio" name="wali_subjek_konseling" value="mahasiswa" required><span><strong>Mahasiswa</strong><span>Mahasiswa yang diwakili yang membutuhkan konseling.</span></span></label>
                                 </div>
-                                <p class="konseling-note" style="margin-top:12px;">Jika yang membutuhkan konseling adalah <strong>mahasiswa</strong>, topik harus berkaitan dengan permasalahan mahasiswa yang diwakili dan berhubungan dengan perkuliahannya.</p>
+                                <div class="konseling-callout">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+                                    <div>Jika yang membutuhkan konseling adalah <strong>wali mahasiswa</strong>, topik harus berkaitan dengan permasalahan mahasiswa yang diwakili dan berhubungan dengan perkuliahannya.</div>
+                                </div>
                                 <div class="konseling-error">Pilih siapa yang akan melakukan konseling.</div>
                             </div>
                             <div class="konseling-field">
@@ -607,10 +657,15 @@
                         </div>
                         <div class="konseling-error">Pilih minimal satu lingkup hambatan.</div>
                     </div>
+                    <div class="konseling-field konseling-other-field" data-other-obstacle hidden>
+                        <label for="lingkup_hambatan_lainnya">Tuliskan lingkup hambatan lainnya <span class="konseling-required">*</span></label>
+                        <input class="konseling-control" id="lingkup_hambatan_lainnya" name="lingkup_hambatan_lainnya" type="text" maxlength="150" placeholder="Contoh: adaptasi lingkungan baru">
+                        <span class="konseling-hint">Wajib diisi karena Anda memilih “Yang lain”. Maksimal 150 karakter.</span>
+                    </div>
 
                     <div class="konseling-section-title">Screening kesejahteraan</div>
 
-                    <div class="who5-card">
+                    <div class="who5-card" data-who5-card>
                         <div class="who5-heading">
                             <div class="who5-icon">♥</div>
                             <div>
@@ -686,9 +741,9 @@
                                     <span>Saya memastikan kondisi ini benar-benar membutuhkan penanganan segera dan bukan sekadar preferensi jadwal.</span>
                                 </span>
                             </label>
-                            <div class="konseling-note is-danger" data-darurat-alert role="alert" hidden style="margin-top:12px;">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
-                                <span><strong>Jika Anda benar-benar dalam kondisi darurat,</strong> segera hubungi Admin LP3 melalui <a href="https://wa.me/6285179510121?text=Halo%20Admin%20SILAKON%2C%20saya%20membutuhkan%20penanganan%20konseling%20segera." target="_blank" rel="noopener">WhatsApp Admin</a> atau layanan kesehatan terdekat. Pengajuan tetap masuk ke antrean, tetapi akan ditandai untuk pemeriksaan segera.</span>
+                            <div class="konseling-callout is-danger" data-darurat-alert role="alert" hidden>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+                                <div><strong>Jika Anda benar-benar dalam kondisi darurat,</strong> segera hubungi Admin LP3 melalui <a href="https://wa.me/6285179510121?text=Halo%20Admin%20SILAKON%2C%20saya%20membutuhkan%20penanganan%20konseling%20segera." target="_blank" rel="noopener">WhatsApp Admin</a> atau layanan kesehatan terdekat. Pengajuan tetap masuk ke antrean, tetapi akan ditandai untuk pemeriksaan segera.</div>
                             </div>
                         </div>
 
@@ -768,7 +823,7 @@
                 <section class="konseling-panel" data-step-panel="4" data-verify-panel>
                     <div class="konseling-panel-head">
                         <h2>Verifikasi email</h2>
-                        <p>Masukkan kode verifikasi yang kami kirim ke email Anda untuk menyelesaikan pengajuan.</p>
+                        <p data-verify-description>Masukkan kode verifikasi yang kami kirim ke email Anda untuk menyelesaikan pengajuan.</p>
                     </div>
 
                     <div class="konseling-note">
@@ -1076,6 +1131,13 @@
             if (confirmWrap) confirmWrap.hidden = !isEmergency;
             if (confirmInput) { confirmInput.required = isEmergency; if (!isEmergency) confirmInput.checked = false; }
         }
+        if (e.target.matches('[name="lingkup_hambatan[]"]')) {
+            const other = form.querySelector('[data-other-obstacle]');
+            const input = form.querySelector('[name="lingkup_hambatan_lainnya"]');
+            const checked = form.querySelector('[name="lingkup_hambatan[]"][value="Yang lain"]')?.checked;
+            if (other) other.hidden = !checked;
+            if (input) input.required = !!checked;
+        }
         if (e.target.matches('[name="wali_subjek_konseling"]')) {
             const wrap = form.querySelector('[data-wali-student-phone]');
             const input = wrap?.querySelector('[name="wali_mahasiswa_telepon"]');
@@ -1084,6 +1146,8 @@
             const whoInputs = form.querySelectorAll('[name^="who5["]');
             const otpParts = form.querySelectorAll('[data-otp-only]');
             const otpInput = form.querySelector('[name="verification_code"]');
+            const whoCard = form.querySelector('[data-who5-card]');
+            const verifyDescription = form.querySelector('[data-verify-description]');
             const isStudent = e.target.value === 'mahasiswa';
             if (wrap) wrap.hidden = !isStudent;
             if (input) input.required = isStudent;
@@ -1092,6 +1156,10 @@
             // WHO-5 untuk mahasiswa yang diwakili diisi sendiri melalui tautan
             // email, bukan oleh wali pada formulir awal.
             whoInputs.forEach((el) => { el.disabled = isStudent; el.required = !isStudent; });
+            if (whoCard) whoCard.hidden = isStudent;
+            if (verifyDescription) verifyDescription.textContent = isStudent
+                ? 'Pengajuan akan diteruskan setelah mahasiswa menyetujui tautan dan mengisi WHO-5.'
+                : 'Masukkan kode verifikasi yang kami kirim ke email Anda untuk menyelesaikan pengajuan.';
             otpParts.forEach((el) => { el.hidden = isStudent; });
             if (otpInput) { otpInput.disabled = isStudent; otpInput.required = !isStudent; }
         }

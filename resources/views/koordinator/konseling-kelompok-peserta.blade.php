@@ -169,7 +169,14 @@
                         <td>{{ $p['semester'] }}</td>
                         <td class="kkp-nowrap">{{ $p['tgl_daftar'] }}</td>
                         <td><span class="kkp-badge tone-{{ $p['status_tone'] }}">{{ $p['status'] }}</span></td>
-                        <td><a href="mailto:{{ $p['email'] ?? '' }}" class="kkp-btn">Email</a></td>
+                        <td class="kkp-actions">
+                            <a href="mailto:{{ $p['email'] ?? '' }}" class="kkp-btn">Email</a>
+                            @php($wa = preg_replace('/\D+/', '', (string) ($p['wa'] ?? '')))
+                            @if($wa)
+                                @if(str_starts_with($wa, '0')) @php($wa = '62'.substr($wa, 1)) @endif
+                                <a href="https://wa.me/{{ $wa }}" target="_blank" rel="noopener" class="kkp-btn">WhatsApp</a>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>

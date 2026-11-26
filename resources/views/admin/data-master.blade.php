@@ -592,7 +592,8 @@
         </div>
     </div>
 
-    {{-- Panel: Template Pesan --}}
+    @if(false)
+    {{-- Panel: Template Pesan (dihapus dari menu) --}}
     <div class="dm-tabpanel {{ $tabAktif === 'template-pesan' ? 'is-active' : '' }}" id="panel-template-pesan">
         <div class="tp-layout">
             {{-- Daftar template --}}
@@ -638,10 +639,11 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Panel tab lain — masih placeholder --}}
     @foreach($tab as $t)
-        @if(! in_array($t['key'], ['konselor', 'fakultas-prodi', 'kategori-masalah', 'lokasi-ruang', 'template-pesan']))
+        @if(! in_array($t['key'], ['konselor', 'fakultas-prodi', 'kategori-masalah', 'lokasi-ruang']))
             <div class="dm-tabpanel {{ $tabAktif === $t['key'] ? 'is-active' : '' }}" id="panel-{{ $t['key'] }}">
                 <div class="dm-placeholder">
                     <b>{{ $t['label'] }}</b>

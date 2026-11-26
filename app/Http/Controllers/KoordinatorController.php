@@ -515,8 +515,8 @@ class KoordinatorController extends Controller
     {
         $data = $request->validate([
             'judul'       => ['required', 'string', 'max:150'],
-            'tanggal'     => ['required', 'string', 'max:50'],
-            'waktu'       => ['required', 'string', 'max:50'],
+            'tanggal'     => ['required', 'date'],
+            'waktu'       => ['required', 'date_format:H:i'],
             'lokasi'      => ['required', 'string', 'max:150'],
             'fasilitator' => ['required', 'string', 'max:150'],
             'kuota'       => ['required', 'integer', 'min:1', 'max:500'],
@@ -544,7 +544,7 @@ class KoordinatorController extends Controller
 
     public function ubahKelompok(Request $request, int $id): RedirectResponse
     {
-        $data=$request->validate(['judul'=>'required|string|max:150','tanggal'=>'required|string|max:50','waktu'=>'required|string|max:50','lokasi'=>'required|string|max:150','fasilitator'=>'required|string|max:150','kuota'=>'required|integer|min:1','tautan_grup'=>'nullable|url|max:500','status'=>'required|in:Pendaftaran Dibuka,Draft,Selesai']);
+        $data=$request->validate(['judul'=>'required|string|max:150','tanggal'=>'required|date','waktu'=>'required|date_format:H:i','lokasi'=>'required|string|max:150','fasilitator'=>'required|string|max:150','kuota'=>'required|integer|min:1','tautan_grup'=>'nullable|url|max:500','status'=>'required|in:Pendaftaran Dibuka,Draft,Selesai']);
         $p=ProgramKonselingKelompok::findOrFail($id);
         if ($p->status === 'Selesai') return back()->with('gagal', 'Program yang sudah selesai hanya dapat melihat peserta atau dihapus.');
         $p->update($data); $this->audit('Ubah Program Kelompok','Memperbarui program "'.$p->judul.'".');
@@ -691,9 +691,9 @@ class KoordinatorController extends Controller
  
     public function selfhelp(): View
     {
-        $materi = SelfHelp::with('author')->where('tipe', 'Modul')->latest()->get()->map(fn ($m) => ['id'=>$m->id,'title'=>$m->judul,'type'=>strtolower($m->tipe),'topic'=>$m->topik,'status'=>$m->status,'author'=>$m->author?->name,'date'=>$m->created_at?->translatedFormat('d M Y'),'isi'=>$m->detail['isi'] ?? '','link_youtube'=>$m->detail['link_youtube'] ?? '','keterangan'=>$m->detail['keterangan'] ?? '','pertanyaan'=>$m->detail['pertanyaan'] ?? [],'blok'=>$m->detail['blok'] ?? [],'jumlah_halaman'=>$m->detail['jumlah_halaman'] ?? null])->values()->all();
+        $materi = SelfHelp::with('author')->where('tipe', 'Modul')->latest()->get()->map(fn ($m) => ['id'=>$m->id,'title'=>$m->judul,'type'=>strtolower($m->tipe),'topic'=>$m->topik,'status'=>$m->status,'author'=>$m->author?->name,'date'=>$m->created_at?->translatedFormat('d M Y'),'isi'=>$m->detail['isi'] ?? '','link_youtube'=>$m->detail['link_youtube'] ?? '','keterangan'=>$m->detail['keterangan'] ?? '','pertanyaan'=>$m->detail['pertanyaan'] ?? [],'blok'=>$m->detail['blok'] ?? [],'file_pdf'=>$m->file_pdf ?: ($m->detail['file_pdf'] ?? null),'jumlah_halaman'=>$m->detail['jumlah_halaman'] ?? null])->values()->all();
         $hasil = SelfHelpPengerjaan::with('materi')->whereHas('materi', fn ($q) => $q->where('tipe', 'Modul'))->latest()->get()->map(function ($h) {
-            $pertanyaan = $h->materi?->detail['pertanyaan'] ?? $h->materi?->detail['questions'] ?? [];
+            $pertanyaan = $this->pertanyaanSelfHelp($h->materi);
             $jawaban = collect($h->jawaban ?? [])->values()->map(function ($jawab, $i) use ($pertanyaan) {
                 $q = $pertanyaan[$i] ?? [];
                 return ['pertanyaan' => $q['teks'] ?? $q['label'] ?? ('Pertanyaan ' . ($i + 1)), 'jawaban' => $jawab];
@@ -728,6 +728,20 @@ class KoordinatorController extends Controller
     /**
      * Simpan materi baru (dipanggil dari modal "Tambah Materi").
      */
+    private function pertanyaanSelfHelp(?SelfHelp $materi): array
+    {
+        if (!$materi) return [];
+        $detail = $materi->detail ?? [];
+        $lama = $detail['pertanyaan'] ?? $detail['questions'] ?? [];
+        if (is_array($lama) && count($lama)) return array_values($lama);
+        return collect($detail['blok'] ?? [])->filter(fn ($b) => is_array($b) && ($b['tipe'] ?? '') === 'soal')
+            ->flatMap(function ($b) {
+                return collect(preg_split('/\r?\n+/', trim((string) ($b['pertanyaan'] ?? $b['isi'] ?? ''))))
+                    ->filter(fn ($teks) => trim($teks) !== '')
+                    ->map(fn ($teks) => ['teks' => trim($teks)]);
+            })->values()->all();
+    }
+
     public function simpanMateriSelfHelp(Request $request): RedirectResponse
     {
         $data = $this->validasiMateri($request);
@@ -740,7 +754,7 @@ class KoordinatorController extends Controller
             $detail['pertanyaan'] = collect($data['pertanyaan'])->map(fn ($q) => ['teks'=>trim($q['teks']), 'halaman'=>(int) $q['halaman']])->values()->all();
             $detail['jumlah_halaman'] = $this->hitungHalamanPdf($detail['file_pdf']) ?: ($data['jumlah_halaman'] ?? null);
         } elseif ($data['type'] === 'modul') {
-            $detail = ['blok' => array_values(json_decode($data['blok_json'], true) ?: [])];
+            $detail = ['blok' => $this->prosesBlokPdfModul(json_decode($data['blok_json'], true) ?: [], $request)];
         }
         SelfHelp::create(['judul'=>$data['title'],'tipe'=>ucfirst($data['type']),'topik'=>$data['topic'],'status'=>$data['status'],'author_id'=>auth()->id(),'detail'=>$detail,'file_pdf'=>$detail['file_pdf'] ?? null]);
         $this->audit('Buat Self Help', 'Membuat materi '.$data['type'].' "'.$data['title'].'".');
@@ -776,7 +790,7 @@ class KoordinatorController extends Controller
             $detail['pertanyaan'] = collect($data['pertanyaan'] ?? ($lamaDetail['pertanyaan'] ?? []))->map(fn ($q) => ['teks'=>trim($q['teks']), 'halaman'=>(int) $q['halaman']])->values()->all();
             $detail['jumlah_halaman'] = $data['jumlah_halaman'] ?? ($lamaDetail['jumlah_halaman'] ?? null);
         } elseif ($data['type'] === 'modul') {
-            $detail = ['blok' => array_values(json_decode($data['blok_json'], true) ?: [])];
+            $detail = ['blok' => $this->prosesBlokPdfModul(json_decode($data['blok_json'], true) ?: [], $request, $lamaDetail['blok'] ?? [])];
         } else {
             if ($materiDb->file_pdf && !preg_match('/^https?:\\/\\//i', $materiDb->file_pdf)) Storage::disk('public')->delete($materiDb->file_pdf);
         }
@@ -842,6 +856,40 @@ class KoordinatorController extends Controller
         return $count > 0 ? $count : null;
     }
 
+    private function prosesBlokPdfModul(array $blocks, Request $request, array $oldBlocks = []): array
+    {
+        $oldById = collect($oldBlocks)->filter('is_array')->keyBy(fn ($b) => (string) ($b['file_id'] ?? ''));
+        $files = $request->file('file_pdf_blok', []);
+        $kept = [];
+        $result = [];
+        foreach (array_values($blocks) as $raw) {
+            $block = is_array($raw) ? $raw : [];
+            if (($block['tipe'] ?? '') !== 'pdf') { $result[] = $block; continue; }
+            $fileId = (string) ($block['file_id'] ?? Str::uuid());
+            $block['file_id'] = $fileId;
+            $previous = $oldById->get($fileId, []);
+            $upload = is_array($files) ? ($files[$fileId] ?? null) : null;
+            if ($upload) {
+                $path = $upload->store('self-help/modul', 'public');
+                $block['file_pdf'] = $path;
+                $block['nama_file'] = $upload->getClientOriginalName();
+                $block['jumlah_halaman'] = $this->hitungHalamanPdf($path) ?: (int) ($block['jumlah_halaman'] ?? 1);
+                if (!empty($previous['file_pdf']) && $previous['file_pdf'] !== $path && !preg_match('/^https?:\\/\\//i', $previous['file_pdf'])) Storage::disk('public')->delete($previous['file_pdf']);
+            } else {
+                $block['file_pdf'] = $block['file_pdf'] ?? ($previous['file_pdf'] ?? null);
+                $block['nama_file'] = $block['nama_file'] ?? ($previous['nama_file'] ?? null);
+                $block['jumlah_halaman'] = $block['jumlah_halaman'] ?? ($previous['jumlah_halaman'] ?? null);
+            }
+            if (!empty($block['file_pdf'])) $kept[] = $block['file_pdf'];
+            $result[] = $block;
+        }
+        foreach ($oldBlocks as $old) {
+            $oldPath = is_array($old) ? ($old['file_pdf'] ?? null) : null;
+            if ($oldPath && !in_array($oldPath, $kept, true) && !preg_match('/^https?:\\/\\//i', $oldPath)) Storage::disk('public')->delete($oldPath);
+        }
+        return $result;
+    }
+
     private function parseTanggal(?string $tanggal): ?Carbon
     {
         if (!$tanggal) return null;
@@ -864,6 +912,8 @@ class KoordinatorController extends Controller
             'link_youtube' => 'required_if:type,video|nullable|url',
             'keterangan'   => 'required_if:type,video|nullable|string',
             'file_pdf' => 'nullable|file|mimes:pdf|max:10240',
+            'file_pdf_blok' => 'sometimes|array',
+            'file_pdf_blok.*' => 'file|mimes:pdf|max:10240',
             'pertanyaan' => 'required_if:type,worksheet|nullable|array|min:1',
             'pertanyaan.*.teks' => 'required|string|max:1000',
             'pertanyaan.*.halaman' => 'required|integer|min:1',

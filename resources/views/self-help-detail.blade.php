@@ -330,6 +330,7 @@
      Warna badge jenis disamakan dengan self-help_blade.php (.sh-type-*)
      ===================================================================== --}}
 <style>
+    .shd-pdf-frame{width:100%;min-height:680px;border:1px solid #dce8df;border-radius:12px;background:#f8faf9}
     /* ---------- Breadcrumb ---------- */
     .shd-crumb-bar { padding: 20px 0; border-bottom: 1px solid #EEF1EC; }
     .shd-back {
@@ -652,7 +653,10 @@
                     var node = document.getElementById('wsResultData'); var result = {};
                     try { result = JSON.parse(node.textContent || '{}'); } catch (e) {}
                     var printable = document.createElement('div');
-                    printable.style.cssText = 'display:block;background:#fff;font-family:Arial,sans-serif;color:#1F2937;padding:28px;width:700px;box-sizing:border-box;position:absolute;left:-10000px;top:0;';
+                    // Jangan menaruh elemen di luar viewport karena html2canvas
+                    // dapat menghasilkan canvas/PDF kosong pada beberapa browser.
+                    // Elemen dibuat sementara di viewport lalu dihapus setelah selesai.
+                    printable.style.cssText = 'display:block;background:#fff;font-family:Arial,sans-serif;color:#1F2937;padding:28px;width:700px;min-height:420px;box-sizing:border-box;position:fixed;left:0;top:0;z-index:2147483000;';
                     var html = '<h1 style="font-size:20px;margin:0 0 6px;">' + esc(result.judul) + '</h1>';
                     html += '<p style="color:#6B7280;font-size:12px;margin:0 0 18px;">Hasil Worksheet Self Help SILAKON</p>';
                     html += '<p style="font-size:13px;line-height:1.7;">Nama: ' + esc(result.nama) + '<br>Email: ' + esc(result.email) + '<br>NIM: ' + esc(result.nim) + '<br>Fakultas: ' + esc(result.fakultas) + '<br>Program Studi: ' + esc(result.prodi) + '</p><hr>';
@@ -660,7 +664,7 @@
                     printable.innerHTML = html; document.body.appendChild(printable);
                     requestAnimationFrame(function () {
                         if (!window.html2pdf) { window.print(); printable.remove(); return; }
-                        html2pdf().set({margin:10,filename:'hasil-worksheet-' + String(result.nama || 'konseli').replace(/[^a-z0-9]+/gi,'-') + '.pdf',html2canvas:{scale:2,backgroundColor:'#fff'},jsPDF:{unit:'mm',format:'a4'}}).from(printable).save().then(function(){ printable.remove(); });
+                        html2pdf().set({margin:10,filename:'hasil-worksheet-' + String(result.nama || 'konseli').replace(/[^a-z0-9]+/gi,'-') + '.pdf',html2canvas:{scale:2,backgroundColor:'#fff',useCORS:true, logging:false},jsPDF:{unit:'mm',format:'a4'}}).from(printable).save().then(function(){ printable.remove(); }).catch(function(){ printable.remove(); window.print(); });
                     });
                 });
             }
@@ -763,12 +767,19 @@
                             var embed = videoId
                                 ? '<div class="shd-video-embed"><iframe src="https://www.youtube.com/embed/' + encodeURIComponent(videoId) + '?rel=0" title="' + esc(b.judul || 'Video Modul') + '" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>'
                                 : '<p>Video tidak dapat dimuat. Periksa tautan YouTube pada materi.</p>';
-                            box.innerHTML = '<h3>' + esc(b.judul || 'Video') + '</h3>' + embed;
+                            box.innerHTML = '<h3>' + esc(b.judul || 'Video') + '</h3>' + embed + (b.keterangan ? '<p class="shd-video-description">' + esc(b.keterangan) + '</p>' : '');
                         } else if (type === 'soal') {
-                            var questionLabel = b.pertanyaan || b.isi || ('Pertanyaan ' + (i + 1));
-                            var qIndex = questions.findIndex(function(q){ return q.label === questionLabel; });
-                            if (qIndex < 0) { qIndex = questions.length; questions.push({label: questionLabel}); }
-                            box.innerHTML = questionHtml({label: questionLabel}, qIndex);
+                            var questionLabels = String(b.pertanyaan || b.isi || ('Pertanyaan ' + (i + 1))).split(/\r?\n+/).map(function(q){ return q.trim(); }).filter(Boolean);
+                            box.innerHTML = '<h3>' + esc(b.judul || 'Pertanyaan') + '</h3>';
+                            questionLabels.forEach(function(questionLabel) {
+                                var qIndex = questions.findIndex(function(q){ return q.label === questionLabel; });
+                                if (qIndex < 0) { qIndex = questions.length; questions.push({label: questionLabel}); }
+                                box.insertAdjacentHTML('beforeend', questionHtml({label: questionLabel}, qIndex));
+                            });
+                        } else if (type === 'pdf') {
+                            var pdfUrl = b.url || b.file_pdf || '';
+                            box.innerHTML = '<h3>' + esc(b.judul || 'Dokumen PDF') + '</h3>' +
+                                (pdfUrl ? '<iframe class="shd-pdf-frame" src="' + esc(pdfUrl) + '#toolbar=1" title="Dokumen PDF"></iframe>' : '<p>Dokumen PDF belum tersedia.</p>');
                         } else if (type === 'kegiatan') {
                             box.innerHTML = '<h3>' + esc(b.judul || 'Kegiatan') + '</h3><p style="white-space:pre-wrap">' + esc(b.instruksi || b.isi || '') + '</p>';
                         } else {

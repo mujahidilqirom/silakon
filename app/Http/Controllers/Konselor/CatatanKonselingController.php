@@ -40,6 +40,7 @@ class CatatanKonselingController extends Controller
                     'kategori' => collect((array) data_get($s->pengajuan?->data, 'lingkup_hambatan', []))->flatten()->filter()->implode(', ') ?: 'Konseling Individual',
                     'kode' => $s->pengajuan?->kode_pengajuan, 'prioritas' => $s->pengajuan?->prioritas ?: 'Belum dihitung',
                     'catatan' => $s->catatanKonseling?->ringkasan,
+                    'hasil' => $s->catatanKonseling?->hasil,
                 ])->values()->all(),
             ];
         })->values()->all();

@@ -149,6 +149,20 @@
                         Bersifat rahasia, hanya untuk konselor yang menangani, admin, dan Koordinator LP3.
                     </div>
                 </div>
+                @php
+                    $who5Questions = ['Saya merasa ceria dan bersemangat.','Saya merasa tenang dan santai.','Saya merasa aktif dan penuh energi.','Saya bangun dengan perasaan segar dan beristirahat cukup.','Kehidupan sehari-hari saya dipenuhi hal-hal yang menarik bagi saya.'];
+                    $who5Words = ['Tidak pernah','Jarang','Kurang dari setengah waktu','Lebih dari setengah waktu','Sering','Selalu'];
+                @endphp
+                @if(count($masalah['who5_jawaban'] ?? []) === 5)
+                    <div class="ck-meta ck-meta-blok">
+                        <span class="ck-info-label">Jawaban WHO-5</span>
+                        <div class="ck-who5-list">
+                            @foreach($who5Questions as $i => $question)
+                                <div><strong>{{ $i + 1 }}. {{ $question }}</strong><span>{{ $who5Words[(int) ($masalah['who5_jawaban'][$i] ?? 0)] ?? 'Tidak diisi' }} ({{ $masalah['who5_jawaban'][$i] }}/5)</span></div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             {{-- Riwayat Konseling --}}
@@ -391,6 +405,7 @@
 </script>
 
 <style>
+    .ck-who5-list{display:grid;gap:8px;margin-top:10px}.ck-who5-list>div{display:grid;gap:3px;padding:10px 12px;border:1px solid #e2ebe4;border-radius:10px;background:#fbfdfb}.ck-who5-list strong{font-size:12px;color:#33463a}.ck-who5-list span{font-size:12px;color:#477055}
     .ck-kembali {
         display: inline-flex;
         align-items: center;

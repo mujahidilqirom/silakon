@@ -34,6 +34,7 @@
                 <ul>
                     <li><a href="{{ url('/login') }}">Login Admin</a></li>
                     <li><a href="{{ url('/login') }}">Login Konselor</a></li>
+                    <li><a href="{{ url('/login') }}">Login Koordinator</a></li>
                 </ul>
                 <a href="{{ url('/ajukan-konseling') }}" class="btn btn-primary">Ajukan Konseling</a>
             </div>
@@ -55,7 +56,7 @@
                     </li>
                     <li>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                        <a href="https://www.instagram.com/bkdisablitas.unnes" target="_blank" rel="noopener">@bkdisablitas.unnes</a>
+                        <a href="https://www.instagram.com/bkdisabilitas.unnes" target="_blank" rel="noopener">@bkdisabilitas.unnes</a>
                     </li>
                     <li>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>

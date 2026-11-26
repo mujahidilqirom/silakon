@@ -475,12 +475,12 @@
             <div class="kk-form-row">
                 <div class="kk-form-group">
                     <label for="kk-tanggal">Tanggal</label>
-                    <input type="text" id="kk-tanggal" name="tanggal" value="{{ old('tanggal') }}" placeholder="mis. 20 Okt 2025" required>
+                    <input type="date" id="kk-tanggal" name="tanggal" value="{{ old('tanggal') }}" required>
                     @error('tanggal') <p class="kk-form-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="kk-form-group">
                     <label for="kk-waktu">Waktu</label>
-                    <input type="text" id="kk-waktu" name="waktu" value="{{ old('waktu') }}" placeholder="mis. 09.00 – 12.00" required>
+                    <input type="time" id="kk-waktu" name="waktu" value="{{ old('waktu') }}" required>
                     @error('waktu') <p class="kk-form-error">{{ $message }}</p> @enderror
                 </div>
             </div>

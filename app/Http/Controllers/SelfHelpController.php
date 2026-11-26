@@ -54,7 +54,11 @@ class SelfHelpController extends Controller
 
         $terkirim = true;
         try {
-            $jawaban = collect($data['jawaban'])->map(fn ($jawab, $nomor) => ($nomor + 1) . '. ' . ($jawab ?: '(kosong)'))->implode("\n\n");
+            $pertanyaan = collect($this->questionsFor($materi))->values();
+            $jawaban = collect($data['jawaban'])->map(function ($jawab, $nomor) use ($pertanyaan) {
+                $teks = data_get($pertanyaan->get($nomor), 'teks', data_get($pertanyaan->get($nomor), 'label', 'Pertanyaan '.($nomor + 1)));
+                return ($nomor + 1) . '. ' . $teks . "\nJawaban: " . ($jawab ?: '(kosong)');
+            })->implode("\n\n");
             InteractiveMail::send($data['email'], 'Hasil Modul Self Help - '.$materi->judul, [
                 'greeting' => 'Halo, '.$data['nama'],
                 'message' => 'Anda telah menyelesaikan modul self help. Berikut identitas pengerjaan dan jawaban yang tersimpan untuk Anda.',
@@ -96,7 +100,13 @@ class SelfHelpController extends Controller
             $r['questions'] = collect($d['pertanyaan'] ?? $d['questions'] ?? [])->values()->map(fn ($q, $i) => ['id' => $q['id'] ?? 'q' . ($i + 1), 'label' => $q['teks'] ?? $q['label'] ?? '', 'page' => (int) ($q['halaman'] ?? $q['page'] ?? 1)])->all();
         }
         if ($m->tipe === 'Modul') {
-            $blok = collect($d['blok'] ?? [])->values()->all();
+            $blok = collect($d['blok'] ?? [])->values()->map(function ($blok) use ($m, $d) {
+                if (($blok['tipe'] ?? '') === 'pdf') {
+                    $path = $blok['file_pdf'] ?? ($d['file_pdf'] ?? $m->file_pdf);
+                    $blok['url'] = $path ? (str_starts_with($path, 'http') ? $path : '/storage/' . ltrim($path, '/')) : null;
+                }
+                return $blok;
+            })->all();
             $r['blocks'] = $blok;
             $r['questions'] = collect($this->questionsFor($m))->values()->map(fn ($q, $i) => ['id' => 'q' . ($i + 1), 'label' => $q['teks'] ?? '', 'page' => 1])->all();
             $r['instruction'] = 'Ikuti materi secara berurutan, lalu jawab pertanyaan dan lakukan kegiatan yang tersedia.';
@@ -107,6 +117,10 @@ class SelfHelpController extends Controller
     private function questionsFor(SelfHelp $m): array
     {
         if ($m->tipe === 'Worksheet') return $m->detail['pertanyaan'] ?? $m->detail['questions'] ?? [];
-        return collect($m->detail['blok'] ?? [])->filter(fn ($b) => ($b['tipe'] ?? '') === 'soal')->map(fn ($b) => ['teks' => $b['pertanyaan'] ?? $b['isi'] ?? ''])->values()->all();
+        return collect($m->detail['blok'] ?? [])->filter(fn ($b) => ($b['tipe'] ?? '') === 'soal')->flatMap(function ($b) {
+            return collect(preg_split('/\\r?\\n+/', trim((string) ($b['pertanyaan'] ?? $b['isi'] ?? ''))))
+                ->filter(fn ($teks) => trim($teks) !== '')
+                ->map(fn ($teks) => ['teks' => trim($teks)]);
+        })->values()->all();
     }
 }

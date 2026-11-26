@@ -203,7 +203,6 @@
                     <tr>
                         <th scope="col">Konseli</th>
                         <th scope="col">Konselor Terakhir</th>
-                        <th scope="col">Kategori</th>
                         <th scope="col">Prioritas SAW</th>
                         <th scope="col">Tgl Sesi</th>
                         <th scope="col">Catatan</th>
@@ -231,7 +230,6 @@
                                     <span class="ctn-tag-anda">Anda</span>
                                 @endif
                             </td>
-                            <td>{{ $terakhir['kategori'] }}</td>
                             <td><span class="ctn-tingkat">{{ $terakhir['prioritas'] }}</span></td>
                             <td>
                                 <span class="ctn-date">
@@ -322,6 +320,7 @@
                                 <p class="ctn-note-empty">Konselor belum mengisi catatan untuk sesi ini.</p>
                             @endif
                         </div>
+                        @if(!empty($s['hasil']))<div class="ctn-note"><p class="ctn-note-label">Hasil Konseling</p><p class="ctn-note-text">{{ $s['hasil'] }}</p></div>@endif
                     </li>
                 @endforeach
             </ol>

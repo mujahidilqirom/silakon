@@ -367,12 +367,12 @@
             <div class="kkc-row">
                 <div class="kkc-field">
                     <label for="kkc-tanggal">Tanggal</label>
-                    <input type="text" id="kkc-tanggal" name="tanggal" value="{{ old('tanggal') }}" placeholder="mis. 20 Okt 2026" required>
+                    <input type="date" id="kkc-tanggal" name="tanggal" value="{{ old('tanggal') }}" required>
                     @error('tanggal') <p class="kkc-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="kkc-field">
                     <label for="kkc-waktu">Waktu</label>
-                    <input type="text" id="kkc-waktu" name="waktu" value="{{ old('waktu') }}" placeholder="mis. 09.00 – 12.00" required>
+                    <input type="time" id="kkc-waktu" name="waktu" value="{{ old('waktu') }}" required>
                     @error('waktu') <p class="kkc-error">{{ $message }}</p> @enderror
                 </div>
             </div>

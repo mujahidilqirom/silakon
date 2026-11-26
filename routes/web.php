@@ -92,6 +92,12 @@ Route::get('/ajukan-konseling', function () {
 
 Route::view('/login', 'auth.login')->name('login');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login')->name('login.store');
+Route::get('/auth/google/redirect', [AuthController::class, 'googleRedirect'])->middleware('throttle:login')->name('google.redirect');
+Route::get('/auth/google/callback', [AuthController::class, 'googleCallback'])->name('google.callback');
+Route::get('/lupa-password', [AuthController::class, 'forgotForm'])->name('password.request');
+Route::post('/lupa-password', [AuthController::class, 'forgotSend'])->middleware('throttle:password.email')->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'resetForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:password.reset')->name('password.update');
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::post('/konseling/kirim-kode', [PengajuanController::class, 'kirimKode'])->middleware('throttle:otp')->name('konseling.kirim-kode');
@@ -177,7 +183,6 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/data-master/lokasi/{id}', [AdminDataMasterController::class, 'lokasiUpdate'])->whereNumber('id')->name('admin.data-master.lokasi.update');
     Route::post('/data-master/lokasi/{id}/toggle', [AdminDataMasterController::class, 'lokasiToggle'])->whereNumber('id')->name('admin.data-master.lokasi.toggle');
     Route::delete('/data-master/lokasi/{id}', [AdminDataMasterController::class, 'lokasiDestroy'])->whereNumber('id')->name('admin.data-master.lokasi.destroy');
-    Route::put('/data-master/template/{kode}', [AdminDataMasterController::class, 'templateUpdate'])->name('admin.data-master.template.update');
 
     Route::get('/profil', [AdminDashboardController::class, 'profil'])->name('admin.profil');
     Route::put('/profil', [AdminDashboardController::class, 'profilUpdate'])->name('admin.profil.update');

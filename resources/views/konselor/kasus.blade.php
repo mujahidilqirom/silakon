@@ -233,6 +233,7 @@
     var modalIsi = document.getElementById('modalIsi');
 
     function bukaModal(judul, isiHtml) {
+        document.getElementById('modalBox').classList.remove('modal-lebar');
         modalJudul.textContent = judul;
         modalIsi.innerHTML = isiHtml;
         overlay.classList.add('tampil');
@@ -240,6 +241,7 @@
     function tutupModal() {
         overlay.classList.remove('tampil');
         modalIsi.innerHTML = '';
+        document.getElementById('modalBox').classList.remove('modal-lebar');
     }
     document.getElementById('modalTutup').addEventListener('click', tutupModal);
     overlay.addEventListener('click', function (e) {
@@ -286,28 +288,60 @@
 
     // ============ Modal: Riwayat ============
     function bukaRiwayat(k) {
-        var total = k.riwayat.length;
+        var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]; }); };
+        var nl2br = function (v) { return esc(v).replace(/\n/g, '<br>'); };
+        var ikon = {
+            tanggal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+            konselor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+            kode: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>'
+        };
+
+        var daftar = k.riwayat || [];
+        var total = daftar.length;
         var html = '<p class="modal-ket">Total <b>' + total + ' entri</b> pengajuan/sesi tercatat untuk konseli ini.</p>';
+
+        if (!total) {
+            html += '<div class="riwayat-kosong">Belum ada riwayat sesi.</div>';
+        }
+
         html += '<div class="riwayat-list">';
 
-        k.riwayat.forEach(function (r) {
+        daftar.forEach(function (r) {
+            var status = String(r.status || '-');
+            var statusKelas = 'status-' + status.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            var judul = r.sesi ? ('Sesi ' + r.sesi) : 'Pengajuan baru';
+
+            var meta = '';
+            if (r.tanggal)   meta += '<span class="riwayat-meta-item">' + ikon.tanggal + esc(r.tanggal) + '</span>';
+            if (r.konselor)  meta += '<span class="riwayat-meta-item">' + ikon.konselor + esc(r.konselor) + '</span>';
+            if (r.pengajuan) meta += '<span class="riwayat-meta-item">' + ikon.kode + esc(r.pengajuan) + '</span>';
+
+            var kategori = String(r.kategori || '').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+            var chips = kategori.map(function (x) { return '<span class="lencana lencana-kategori">' + esc(x) + '</span>'; }).join('');
+
+            var detail = '';
+            detail += '<div class="riwayat-detail-baris"><span class="riwayat-detail-label">Uraian</span><span class="riwayat-detail-isi">' + (r.uraian ? nl2br(r.uraian) : '-') + '</span></div>';
+            if (r.catatan) detail += '<div class="riwayat-detail-baris"><span class="riwayat-detail-label">Catatan</span><span class="riwayat-detail-isi">' + nl2br(r.catatan) + '</span></div>';
+            if (r.hasil)   detail += '<div class="riwayat-detail-baris"><span class="riwayat-detail-label">Hasil</span><span class="riwayat-detail-isi riwayat-hasil">' + nl2br(r.hasil) + '</span></div>';
+
             html += '' +
-                '<div class="riwayat-baris">' +
-                    '<div class="riwayat-bulat">' + r.sesi + '</div>' +
-                    '<div class="riwayat-info">' +
-                        '<b>' + (r.sesi ? ('Sesi ' + r.sesi) : 'Pengajuan baru') + '</b>' +
-                        '<span class="sel-sub">' + r.tanggal + ' &middot; ' + r.konselor + (r.pengajuan ? ' &middot; ' + r.pengajuan : '') + '</span>' +
-                        '<span class="sel-sub">Status: ' + (r.status || '-') + '</span>' +
-                        '<span class="sel-sub"><b>Uraian:</b> ' + (r.uraian || '-') + '</span>' +
-                        (r.catatan ? '<span class="sel-sub"><b>Catatan:</b> ' + r.catatan + '</span>' : '') +
-                        (r.hasil ? '<span class="sel-sub"><b>Hasil:</b> ' + r.hasil + '</span>' : '') +
-                    '</div>' +
-                    '<span class="lencana lencana-kategori">' + r.kategori + '</span>' +
-                '</div>';
+                '<article class="riwayat-kartu">' +
+                    '<header class="riwayat-kartu-kepala">' +
+                        '<div class="riwayat-bulat">' + esc(r.sesi || '•') + '</div>' +
+                        '<div class="riwayat-judul">' +
+                            '<b>' + esc(judul) + '</b>' +
+                            '<div class="riwayat-meta">' + meta + '</div>' +
+                        '</div>' +
+                        '<span class="riwayat-status ' + statusKelas + '">' + esc(status) + '</span>' +
+                    '</header>' +
+                    (chips ? '<div class="riwayat-kategori">' + chips + '</div>' : '') +
+                    '<div class="riwayat-detail">' + detail + '</div>' +
+                '</article>';
         });
 
         html += '</div>';
         bukaModal('Riwayat Sesi — ' + k.nama, html);
+        document.getElementById('modalBox').classList.add('modal-lebar');
     }
 
     // ============ Modal: Survey ============
@@ -587,30 +621,79 @@
 
     .modal-aksi { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 
-    .riwayat-list { display: flex; flex-direction: column; gap: 4px; }
-    .riwayat-baris {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid #eef2ef;
+    .modal-box.modal-lebar { max-width: 640px; }
+
+    .riwayat-list { display: flex; flex-direction: column; gap: 12px; }
+    .riwayat-kosong {
+        padding: 28px 16px; text-align: center; font-size: 13px; color: #8a978f;
+        background: #f7faf8; border: 1px dashed #dfe6e1; border-radius: 12px;
     }
-    .riwayat-baris:last-child { border-bottom: none; }
+    .riwayat-kartu {
+        border: 1px solid #e6ece8;
+        border-radius: 12px;
+        background: #fff;
+        padding: 14px 16px;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .riwayat-kartu:hover { border-color: #cfe0d6; box-shadow: 0 2px 10px rgba(22,36,29,.05); }
+
+    .riwayat-kartu-kepala { display: flex; align-items: flex-start; gap: 12px; }
     .riwayat-bulat {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #dff3e6;
-        color: #1f7a4d;
-        font-size: 12.5px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        width: 32px; height: 32px; border-radius: 50%;
+        background: #dff3e6; color: #1f7a4d;
+        font-size: 13px; font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center;
         flex-shrink: 0;
     }
-    .riwayat-info { display: flex; flex-direction: column; flex: 1; }
-    .riwayat-info b { font-size: 13.5px; color: #16241d; }
+    .riwayat-judul { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .riwayat-judul b { font-size: 14.5px; color: #16241d; line-height: 1.3; }
+    .riwayat-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+    .riwayat-meta-item {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: 12px; color: #6b7a72; line-height: 1.4;
+    }
+    .riwayat-meta-item svg { width: 13px; height: 13px; flex-shrink: 0; color: #8a978f; }
+
+    .riwayat-status {
+        flex-shrink: 0;
+        padding: 4px 10px; border-radius: 999px;
+        font-size: 11.5px; font-weight: 700;
+        background: #eef1f4; color: #55616b;
+    }
+    .riwayat-status.status-selesai { background: #dff3e6; color: #1f7a4d; }
+    .riwayat-status.status-aktif,
+    .riwayat-status.status-berlangsung,
+    .riwayat-status.status-terjadwal,
+    .riwayat-status.status-dijadwalkan { background: #dfeaf9; color: #1d5fa8; }
+    .riwayat-status.status-menunggu,
+    .riwayat-status.status-diajukan { background: #fdf3d0; color: #92720c; }
+    .riwayat-status.status-dibatalkan,
+    .riwayat-status.status-ditolak { background: #fbe3e1; color: #b3322a; }
+
+    .riwayat-kategori { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0 44px; }
+    .riwayat-kategori .lencana { font-size: 11.5px; }
+
+    .riwayat-detail {
+        margin: 12px 0 0 44px;
+        padding: 10px 12px;
+        background: #f7faf8;
+        border-radius: 10px;
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .riwayat-detail-baris { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: start; }
+    .riwayat-detail-label {
+        font-size: 11px; font-weight: 700; letter-spacing: .04em;
+        text-transform: uppercase; color: #8a978f; padding-top: 2px;
+    }
+    .riwayat-detail-isi { font-size: 13px; color: #33403a; line-height: 1.55; word-break: break-word; }
+    .riwayat-hasil { color: #1f7a4d; font-weight: 600; }
+
+    @media (max-width: 520px) {
+        .riwayat-kartu-kepala { flex-wrap: wrap; }
+        .riwayat-kategori, .riwayat-detail { margin-left: 0; }
+        .riwayat-detail-baris { grid-template-columns: 1fr; gap: 2px; }
+    }
+
     .sel-sub { font-size: 11.5px; color: #8a978f; margin-top: 1px; }
 
     .survey-contoh {

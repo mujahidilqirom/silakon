@@ -72,6 +72,7 @@ class DetailSesiController extends Controller
             'darurat' => ($data['kondisi_darurat'] ?? 'tidak') === 'ya',
             'prioritas' => $jadwal->pengajuan?->prioritas ?: 'Belum dihitung',
             'who5_skor' => $jadwal->pengajuan?->who5_skor, 'saw_nilai' => $jadwal->pengajuan?->saw_nilai,
+            'who5_jawaban' => (array) data_get($data, 'who5_jawaban', []),
             'pilihan_konselor' => $data['pilihan_konselor'] ?? '-',
             'lingkup' => $data['lingkup_hambatan'] ?? [], 'uraian' => $data['deskripsi_masalah'] ?? '-',
         ];

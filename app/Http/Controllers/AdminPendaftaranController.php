@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Support\SimplePdf;
 use Carbon\Carbon;
 use App\Support\TelegramNotifier;
@@ -683,11 +684,12 @@ class AdminPendaftaranController extends Controller
             }
             return $jadwal;
         });
-        $this->audit('Buat Jadwal Konseling', 'Menetapkan jadwal untuk pengajuan '.$pengajuan->kode_pengajuan.' pada '.$data['tanggal'].' '.$data['mulai'].'-'.$data['selesai'].' bersama '.$konselor->name.'.');
+        $isReschedule = (bool) $jadwalLama;
+        $this->audit($isReschedule ? 'Ubah Jadwal Konseling' : 'Buat Jadwal Konseling', ($isReschedule ? 'Mengubah' : 'Menetapkan').' jadwal untuk pengajuan '.$pengajuan->kode_pengajuan.' pada '.$data['tanggal'].' '.$data['mulai'].'-'.$data['selesai'].' bersama '.$konselor->name.'.');
         app(TelegramNotifier::class)->sendTo($konselor,
-            "📅 Jadwal konseling SILAKON\n\n".
+            ($isReschedule ? "🔄 Reschedule jadwal konseling SILAKON\n\n" : "📅 Jadwal konseling SILAKON\n\n").
             "Kode: {$pengajuan->kode_pengajuan}\n".
-            "Konseli: ".($pengajuan->konseli?->nama ?: 'Konseli')."\n".
+            "Konseli: ".$this->maskNama($pengajuan->konseli?->nama ?: 'Konseli')."\n".
             "Tanggal: ".Carbon::parse($data['tanggal'])->translatedFormat('d F Y')."\n".
             "Waktu: {$data['mulai']}–{$data['selesai']}\n".
             "Lokasi: ".($data['lokasi'] ?: $data['metode'] ?: '-')."\n\n".
@@ -695,9 +697,9 @@ class AdminPendaftaranController extends Controller
         );
         if ($pengajuan->email) {
             try {
-                InteractiveMail::send($pengajuan->email, 'Jadwal Konseling Anda Telah Disiapkan', [
+                InteractiveMail::send($pengajuan->email, $isReschedule ? 'Perubahan Jadwal Konseling Anda' : 'Jadwal Konseling Anda Telah Disiapkan', [
                     'greeting' => 'Halo, '.($pengajuan->konseli?->nama ?: 'Konseli'),
-                    'message' => 'Waktu untuk berbicara telah disiapkan. Datanglah dengan tenang—tidak perlu menyiapkan kata-kata yang sempurna. Cukup hadir dan ceritakan apa yang Anda rasakan.',
+                    'message' => $isReschedule ? 'Jadwal konseling Anda telah diperbarui oleh Admin. Mohon gunakan waktu dan lokasi terbaru di bawah ini.' : 'Waktu untuk berbicara telah disiapkan. Datanglah dengan tenang—tidak perlu menyiapkan kata-kata yang sempurna. Cukup hadir dan ceritakan apa yang Anda rasakan.',
                     'status' => 'Terjadwal',
                     'details' => ['Kode pengajuan' => $pengajuan->kode_pengajuan, 'Tanggal' => Carbon::parse($data['tanggal'])->translatedFormat('d F Y'), 'Waktu' => $data['mulai'].'–'.$data['selesai'].' WIB', 'Lokasi' => ($data['lokasi'] ?: $data['metode'] ?: '-')],
                     'actionUrl' => route('cek-status.hasil', ['kode' => $pengajuan->kode_pengajuan, 'email' => $pengajuan->email]),
@@ -712,6 +714,14 @@ class AdminPendaftaranController extends Controller
     private function waktuSudahLewat(string $tanggal, string $mulai): bool
     {
         return \Carbon\Carbon::parse($tanggal . ' ' . $mulai, config('app.timezone'))->isPast();
+    }
+
+    private function maskNama(string $nama): string
+    {
+        return collect(preg_split('/\s+/', trim($nama)))->filter()->map(function ($kata) {
+            $kata = (string) $kata;
+            return mb_strtoupper(mb_substr($kata, 0, 1)).str_repeat('*', max(3, min(6, mb_strlen($kata) - 1)));
+        })->implode(' ') ?: 'K***';
     }
 
     /**
@@ -1087,8 +1097,8 @@ class AdminPendaftaranController extends Controller
     {
         $data = $request->validate([
             'judul'       => 'required|string|max:150',
-            'tanggal'     => 'required|string|max:50',
-            'waktu'       => 'required|string|max:50',
+            'tanggal'     => 'required|date',
+            'waktu'       => 'required|date_format:H:i',
             'lokasi'      => 'required|string|max:150',
             'fasilitator' => 'required|string|max:150',
             'kuota'       => 'required|integer|min:1',
@@ -1123,7 +1133,7 @@ class AdminPendaftaranController extends Controller
 
     public function ubahKonselingKelompok(Request $request, int $id)
     {
-        $data = $request->validate(['judul'=>'required|string|max:150','tanggal'=>'required|string|max:50','waktu'=>'required|string|max:50','lokasi'=>'required|string|max:150','fasilitator'=>'required|string|max:150','kuota'=>'required|integer|min:1','tautan_grup'=>'nullable|url|max:500','status'=>'required|in:Pendaftaran Dibuka,Draft,Selesai']);
+        $data = $request->validate(['judul'=>'required|string|max:150','tanggal'=>'required|date','waktu'=>'required|date_format:H:i','lokasi'=>'required|string|max:150','fasilitator'=>'required|string|max:150','kuota'=>'required|integer|min:1','tautan_grup'=>'nullable|url|max:500','status'=>'required|in:Pendaftaran Dibuka,Draft,Selesai']);
         $p = ProgramKonselingKelompok::findOrFail($id);
         if ($p->status === 'Selesai') return back()->with('gagal', 'Program yang sudah selesai hanya dapat melihat peserta atau dihapus.');
         $p->update($data);
@@ -1326,6 +1336,8 @@ class AdminPendaftaranController extends Controller
 
             // Worksheet
             'file_pdf'             => 'required_if:tipe,Worksheet|nullable|file|mimes:pdf|max:10240',
+            'file_pdf_blok'        => 'sometimes|array',
+            'file_pdf_blok.*'      => 'file|mimes:pdf|max:10240',
             'pertanyaan'           => 'required_if:tipe,Worksheet|nullable|array|min:1',
             'pertanyaan.*.teks'    => 'required|string|max:1000',
             'pertanyaan.*.halaman' => 'required|integer|min:1',
@@ -1384,7 +1396,7 @@ class AdminPendaftaranController extends Controller
             if (!is_array($blok) || count($blok) < 1) {
                 return back()->withInput()->withErrors(['blok_json' => 'Tambahkan minimal satu blok materi.']);
             }
-            $detail = ['blok' => array_values(array_map(fn ($b) => is_array($b) ? $b : [], $blok))];
+            $detail = ['blok' => $this->prosesBlokPdfModul($blok, $request)];
         }
 
         SelfHelp::create(['judul' => $data['judul'], 'tipe' => $data['tipe'], 'topik' => $data['topik'], 'status' => $data['status'], 'author_id' => auth()->id(), 'detail' => $detail, 'thumbnail' => $detail['thumbnail'] ?? null, 'file_pdf' => $detail['file_pdf'] ?? null]);
@@ -1456,6 +1468,8 @@ class AdminPendaftaranController extends Controller
             'link_youtube'         => ['required_if:tipe,Video', 'nullable', 'url', 'regex:/^https?:\\/\\/(www\\.|m\\.)?(youtube\\.com|youtu\\.be)\\/.+$/i'],
             'keterangan'           => 'required_if:tipe,Video|nullable|string',
             'file_pdf'             => 'nullable|file|mimes:pdf|max:10240',
+            'file_pdf_blok'        => 'sometimes|array',
+            'file_pdf_blok.*'      => 'file|mimes:pdf|max:10240',
             'pertanyaan'           => 'required_if:tipe,Worksheet|nullable|array|min:1',
             'pertanyaan.*.teks'    => 'required|string|max:1000',
             'pertanyaan.*.halaman' => 'required|integer|min:1',
@@ -1505,9 +1519,8 @@ class AdminPendaftaranController extends Controller
             if (!is_array($blok) || count($blok) < 1) {
                 return back()->withInput()->withErrors(['blok_json' => 'Tambahkan minimal satu blok materi.']);
             }
-            $detail = ['blok' => array_values(array_map(fn ($b) => is_array($b) ? $b : [], $blok))];
+            $detail = ['blok' => $this->prosesBlokPdfModul($blok, $request, $lama['blok'] ?? [])];
             $this->hapusFileSelfHelp($materi->thumbnail);
-            $this->hapusFileSelfHelp($materi->file_pdf);
         }
 
         $materi->update([
@@ -1538,6 +1551,40 @@ class AdminPendaftaranController extends Controller
         if ($path && !preg_match('/^https?:\\/\\//i', $path)) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($path);
         }
+    }
+
+    private function prosesBlokPdfModul(array $blocks, Request $request, array $oldBlocks = []): array
+    {
+        $oldById = collect($oldBlocks)->filter('is_array')->keyBy(fn ($b) => (string) ($b['file_id'] ?? ''));
+        $files = $request->file('file_pdf_blok', []);
+        $kept = [];
+        $result = [];
+        foreach (array_values($blocks) as $raw) {
+            $block = is_array($raw) ? $raw : [];
+            if (($block['tipe'] ?? '') !== 'pdf') { $result[] = $block; continue; }
+            $fileId = (string) ($block['file_id'] ?? Str::uuid());
+            $block['file_id'] = $fileId;
+            $previous = $oldById->get($fileId, []);
+            $upload = is_array($files) ? ($files[$fileId] ?? null) : null;
+            if ($upload) {
+                $path = $upload->store('self-help/modul', 'public');
+                $block['file_pdf'] = $path;
+                $block['nama_file'] = $upload->getClientOriginalName();
+                $block['jumlah_halaman'] = $this->hitungHalamanPdf($path) ?: (int) ($block['jumlah_halaman'] ?? 1);
+                if (!empty($previous['file_pdf']) && $previous['file_pdf'] !== $path) $this->hapusFileSelfHelp($previous['file_pdf']);
+            } else {
+                $block['file_pdf'] = $block['file_pdf'] ?? ($previous['file_pdf'] ?? null);
+                $block['nama_file'] = $block['nama_file'] ?? ($previous['nama_file'] ?? null);
+                $block['jumlah_halaman'] = $block['jumlah_halaman'] ?? ($previous['jumlah_halaman'] ?? null);
+            }
+            if (!empty($block['file_pdf'])) $kept[] = $block['file_pdf'];
+            $result[] = $block;
+        }
+        foreach ($oldBlocks as $old) {
+            $oldPath = is_array($old) ? ($old['file_pdf'] ?? null) : null;
+            if ($oldPath && !in_array($oldPath, $kept, true)) $this->hapusFileSelfHelp($oldPath);
+        }
+        return $result;
     }
 
     private function mapSelfHelpDb(SelfHelp $m): array
