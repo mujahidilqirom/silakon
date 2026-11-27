@@ -5,6 +5,10 @@
 @section('content')
 @php
     $steps = ['Data Konseli', 'Kategori & Permasalahan', 'Persetujuan', 'Verifikasi'];
+    $waAdminLayanan = preg_replace('/^0/', '62', preg_replace('/\D/', '', (string) data_get($kontakLayanan ?? [], 'wa_admin', '085179510121')));
+    $waAdminTampil = data_get($kontakLayanan ?? [], 'wa_admin', '085179510121');
+    $waDaruratLayanan = preg_replace('/^0/', '62', preg_replace('/\D/', '', (string) data_get($kontakLayanan ?? [], 'wa_darurat', '082134059075')));
+    $jamLayanan = data_get($kontakLayanan ?? [], 'jam_layanan', 'Senin–Kamis, 08.00–16.00 WIB; Jumat, 08.00–15.00 WIB');
 
     $konseliTypes = [
         [
@@ -331,8 +335,8 @@
 
             <div class="konseling-help">
                 <strong>Butuh bantuan mengisi?</strong>
-                <p>Hubungi kami pada jam kerja: Senin–Kamis 08.00–16.00 WIB, Jumat 08.00–15.00 WIB.</p>
-                <a href="https://wa.me/6285179510121" target="_blank" rel="noopener">
+                <p>Hubungi kami pada jam layanan: {{ $jamLayanan }}</p>
+                <a href="https://wa.me/{{ $waAdminLayanan }}" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2.1Z"/></svg>
                     Hubungi admin layanan
                 </a>
@@ -743,7 +747,7 @@
                             </label>
                             <div class="konseling-callout is-danger" data-darurat-alert role="alert" hidden>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
-                                <div><strong>Jika Anda benar-benar dalam kondisi darurat,</strong> segera hubungi Admin LP3 melalui <a href="https://wa.me/6285179510121?text=Halo%20Admin%20SILAKON%2C%20saya%20membutuhkan%20penanganan%20konseling%20segera." target="_blank" rel="noopener">WhatsApp Admin</a> atau layanan kesehatan terdekat. Pengajuan tetap masuk ke antrean, tetapi akan ditandai untuk pemeriksaan segera.</div>
+                                <div><strong>Jika Anda benar-benar dalam kondisi darurat,</strong> segera hubungi Admin LP3 melalui <a href="https://wa.me/{{ $waAdminLayanan }}?text={{ rawurlencode('Halo Admin SILAKON, saya membutuhkan penanganan konseling segera.') }}" target="_blank" rel="noopener">WhatsApp Admin</a> atau layanan darurat tambahan <a href="https://wa.me/{{ $waDaruratLayanan }}" target="_blank" rel="noopener">{{ $waDaruratLayanan }}</a>. Pengajuan tetap masuk ke antrean, tetapi akan ditandai untuk pemeriksaan segera.</div>
                             </div>
                         </div>
 

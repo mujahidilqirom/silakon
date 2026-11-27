@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@php
+    $waAdminLayanan = preg_replace('/^0/', '62', preg_replace('/\D/', '', (string) data_get($kontakLayanan ?? [], 'wa_admin', '085179510121')));
+    $waAdminTampil = data_get($kontakLayanan ?? [], 'wa_admin', '085179510121');
+    $jamLayanan = data_get($kontakLayanan ?? [], 'jam_layanan', 'Senin–Kamis, 08.00–16.00 WIB; Jumat, 08.00–15.00 WIB');
+@endphp
+
 @section('title', 'Tentang Kami — LPPP UNNES | SILAKON')
 
 @section('content')
@@ -184,12 +190,8 @@
                         <span class="info-label">Jam Operasional</span>
 
                         <div class="schedule-row">
-                            <span>Senin &ndash; Kamis</span>
-                            <span>08.00 &ndash; 16.00 WIB</span>
-                        </div>
-                        <div class="schedule-row">
-                            <span>Jumat</span>
-                            <span>08.00 &ndash; 15.00 WIB</span>
+                            <span>Jam layanan</span>
+                            <span>{{ $jamLayanan }}</span>
                         </div>
                         <div class="schedule-row">
                             <span>Sabtu &ndash; Minggu</span>
@@ -218,7 +220,7 @@
                     </span>
                     <div>
                         <span class="info-label">Telepon</span>
-                        <span class="info-value"><a href="https://wa.me/6285179510121" target="_blank" rel="noopener">+62 851 7951 0121</a></span>
+                        <span class="info-value"><a href="https://wa.me/{{ $waAdminLayanan }}" target="_blank" rel="noopener">{{ $waAdminTampil }}</a></span>
                     </div>
                 </div>
 

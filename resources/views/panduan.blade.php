@@ -5,6 +5,7 @@
 @section('content')
 
 @php
+    $waAdminTampil = data_get($kontakLayanan ?? [], 'wa_admin', '085179510121');
     // Siapa yang dapat menggunakan layanan
     $audiences = [
         [
@@ -102,7 +103,7 @@
         ],
         [
             'q' => 'Bagaimana jika permasalahan saya darurat atau membutuhkan penanganan segera?',
-            'a' => 'Untuk kondisi darurat, jangan menunggu proses verifikasi. Hubungi admin LPPP melalui WhatsApp +62 851 7951 0121 atau email karir@mail.unnes.ac.id, atau segera hubungi layanan kesehatan / orang terdekat Anda.',
+            'a' => 'Untuk kondisi darurat, jangan menunggu proses verifikasi. Hubungi admin LPPP melalui WhatsApp '.$waAdminTampil.' atau email karir@mail.unnes.ac.id, atau segera hubungi layanan kesehatan / orang terdekat Anda.',
         ],
     ];
 @endphp
